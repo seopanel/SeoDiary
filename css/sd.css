@@ -1,5 +1,6 @@
 @CHARSET "UTF-8";
 
+/*
 .container {
     border: 2px solid #dedede;
     background:   rgb(174, 214, 241);
@@ -60,15 +61,14 @@ p {
     margin: 0;
     color: rgb(23, 32, 42);
   }
-
-.clearfix { *zoom: 1; } /* For IE 6/7 */
+  
+  
+.clearfix { *zoom: 1; } 
 .clearfix:before, .clearfix:after {
     content: "";
     display: table;
 }
 .clearfix:after { clear: both; }
-
-/* ---------- LIVE-CHAT ---------- */
 
 #live-chat {
   font-size: 12px;
@@ -218,4 +218,4 @@ textarea:focus {
 
 .input:focus {
   border: 3px solid #555;
-}
+}*/

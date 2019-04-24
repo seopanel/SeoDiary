@@ -13,7 +13,7 @@ class SeoDiary extends SeoPluginsController {
 	var $settingsCtrler;
 	
 	// the plugin text database table
-	var $textTable = "sd_texts";
+	var $textTable = "texts";
 	
 	// the plugin text category
 	var $textCategory = "seodiary";

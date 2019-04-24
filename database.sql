@@ -1,9 +1,4 @@
 --
--- Table structure for table `sd_texts`
---
-
-
---
 -- Table structure for table `sd_category`
 --
 
@@ -189,35 +184,15 @@ ALTER TABLE `sd_seo_diary`
   ADD CONSTRAINT `diary_project_delete` FOREIGN KEY (`project_id`) REFERENCES `sd_projects` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 
-CREATE TABLE IF NOT EXISTS `sd_texts` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `lang_code` varchar(8) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'en',
-  `category` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'seodiary',
-  `label` varchar(120) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `content` text COLLATE utf8_unicode_ci,
-  `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `lang_code` (`lang_code`,`category`,`label`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+ALTER TABLE `sd_projects` ADD CONSTRAINT `sd_project_website_id_delete` FOREIGN KEY ( `website_id` ) REFERENCES `websites` 
+(`id`) ON DELETE CASCADE ON UPDATE NO ACTION ;
 
-
-INSERT INTO `sd_texts` ( `category`, `label`, `content`) VALUES
+INSERT INTO `texts` ( `category`, `label`, `content`) VALUES
 ('seodiary', 'Diary Manager', 'Diary Manager'),
 ('seodiary', 'Diary Comments', 'Diary Comments'),
-('seodiary', 'Plugin Settings', 'Plugin Settings'),
 ('seodiary', 'My Tasks', 'My Tasks'),
-('seodiary', 'Project Summary', 'Project Summary'),
 ('seodiary', 'Projects Manager', 'Projects Manager'),
-('seodiary', 'Project', 'Project'),
-('seodiary', 'Category', 'Category'),
 ('seodiary', 'Assignee', 'Assignee'),
-('seodiary', 'Keywords', 'Keywords'),
-('seodiary', 'Status', 'Status'),
 ('seodiary', 'Sorting', 'Sorting'),
 ('seodiary', 'New Diary', 'New Diary'),
-('seodiary', 'Comments', 'Comments'),
-('seodiary', 'Project Name', 'Project Name'),
-('seodiary', 'Diary Name', 'Diary Name'),
-('seodiary', 'Add Comment', 'Add Comment'),
-('seodiary', 'Cancel', 'Cancel')
-('seodiary', 'Notification Mail From Seo Panel', 'Notification Mail From Seo Panel'); 
+('seodiary', 'Add Comment', 'Add Comment'); 
