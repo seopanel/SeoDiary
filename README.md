@@ -1,2 +1,3 @@
-# SeoDiary
-SEO Diary plugin used to store all seo actions and information done for a website in diary format
+# SEO Diary
+
+SEO Diary plugin used to store all information done about a website in diary format
