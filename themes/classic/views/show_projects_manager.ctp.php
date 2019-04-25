@@ -1,4 +1,6 @@
-<?php echo showSectionHead($pluginText["Projects Manager"]); ?>
+<?php
+echo showSectionHead($pluginText["Projects Manager"]);
+?>
 <?php if(!empty($isAdmin)){ ?>
 	<table width="50%" class="search">
 		<tr>
@@ -53,7 +55,7 @@
 						<option value="select">-- <?php echo $spText['common']['Select']?> --</option>
 						<option value="<?php echo $statAction?>"><?php echo $statLabel?></option>
                         <option value="editProject"><?php echo $spText['common']['Edit']?></option>
-                        <option value="projectSummery"><?php echo $pluginText['Project Summary']?></option>
+                        <option value="projectSummery"><?php echo $spTextSA['Project Summary']?></option>
                         <option value="diaryManager"><?php echo $pluginText['Diary Manager']?></option>
 					    <option value="deleteProject"><?php echo $spText['common']['Delete']?></option>
 					</select>

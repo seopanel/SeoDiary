@@ -24,7 +24,7 @@ class Project extends SeoDiary {
 			$websiteList = $webSiteCtrler->__getAllWebsites();
 			$this->set( 'websiteList', $websiteList );
 			
-			if(! empty( $info ['user_id'] )) {
+			if(!empty( $info ['user_id'] )) {
 				$pgScriptPath .= "&user_id=" . $info ['user_id'];
 				$sql .= " and w.user_id=" . $info ['user_id'];
 				$this->set( 'userId', $info ['user_id'] );
@@ -47,6 +47,7 @@ class Project extends SeoDiary {
 		$projectList = $this->db->select( $sql );
 		$this->set( 'list', $projectList );
 		$this->set( 'pageNo', $_GET ['pageno'] );
+		$this->set('spTextSA', $this->getLanguageTexts('siteauditor', $_SESSION['lang_code']));
 		$this->pluginRender( 'show_projects_manager' );
 	}
 	/*
