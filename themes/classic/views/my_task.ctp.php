@@ -2,7 +2,7 @@
 <form id="searchform">
 <table class="search" width="80%">
     <tr>
-		<th><?php echo $pluginText['Project']?>:</th>
+		<th><?php echo $spText['label']['Project']?>:</th>
 		<td>
 			<select name="project_id">
 				<option value="">-- <?php echo $spText['common']['Select']?> --</option>
@@ -14,13 +14,12 @@
 					<?php }?>						
 				<?php }?>
 			</select>
-			<?php echo $errMsg['project_id']?>
 		</td>
-		<td><?php echo $pluginText['Keywords']?>:</td>
+		<th><?php echo $spText['common']['Keywords']?>:</th>
 		<td><input type="text" class="input" name="keyword" value="<?php echo $post['keyword']?>"><?php echo $errMsg['keyword']?></td>
 	</tr>
 	<tr>
-		<th><?php  echo $pluginText['Status']?>:</th>
+		<th><?php  echo $spText['common']['Status']?>:</th>
 		<td>
 			<select name="status">
 				<option value="">-- <?php echo $spText['common']['Select']?> --</option>
@@ -32,17 +31,16 @@
 					<?php }?>						
 				<?php }?>
 			</select>
-			<?php echo $errMsg['status']?>
 		</td>
 		<th><?php echo $pluginText['Sorting']?>:</th>
-		<td colspan="3">
+		<td>
 			<select name="sort_col">
-				<option value="due_date"><?php echo 'Due Date'?></option>
-				<option value="status"><?php echo 'Status'?></option>
+				<option value="due_date"><?php echo $pluginText['Due Date']?></option>
+				<option value="status"><?php echo $spText['common']['Status']?></option>
 	        </select>
 			<select name="sort_val">
-				<option value="ASC"><?php echo 'Ascending'?></option>
-				<option value="DESC"><?php echo 'Descending'?></option>
+				<option value="ASC"><?php echo $pluginText['Ascending']?></option>
+				<option value="DESC"><?php echo $pluginText['Descending']?></option>
 			</select>
          	<?php $actFun = SP_DEMO ? "alertDemoMsg()" : pluginPOSTMethod('searchform', 'content', 'action=myTasks'); ?>
          	<a onclick="<?php echo $actFun?>" href="javascript:void(0);" class="actionbut">
@@ -56,13 +54,13 @@
 
 <table id="cust_tab">
 	<tr>
-		<th>Id</th>
-		<th>Title</th>
-		<th>Project</th>
-		<th>Category</th>
-		<th>Due Date</th>
-		<th>Status</th>
-		<th>Action</th>
+		<th><?php echo $spText['common']['Id']?></th>
+		<th><?php echo $spText['label']['Title']?></th>
+		<th><?php echo $spText['label']['Project']?></th>
+		<th><?php echo $spText['common']['Category']?></th>
+		<th><?php echo $pluginText['Due Date']?></th>
+		<th><?php echo $spText['common']['Status']?></th>
+		<th><?php echo $spText['common']['Action']?></th>
 	</tr>
 	<?php
 	if(count($list) > 0) {
@@ -94,4 +92,3 @@
 	} 
 	?>
 </table>
-<br>

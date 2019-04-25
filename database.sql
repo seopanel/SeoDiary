@@ -188,6 +188,9 @@ ALTER TABLE `sd_projects` ADD CONSTRAINT `sd_project_website_id_delete` FOREIGN 
 (`id`) ON DELETE CASCADE ON UPDATE NO ACTION ;
 
 INSERT INTO `texts` ( `category`, `label`, `content`) VALUES
+('seodiary', 'Due Date', 'Due Date'),
+('seodiary', 'Ascending', 'Ascending'),
+('seodiary', 'Descending', 'Descending'),
 ('seodiary', 'Diary Manager', 'Diary Manager'),
 ('seodiary', 'Diary Comments', 'Diary Comments'),
 ('seodiary', 'My Tasks', 'My Tasks'),
