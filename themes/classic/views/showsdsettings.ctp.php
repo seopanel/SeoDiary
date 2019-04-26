@@ -1,12 +1,10 @@
-<?php echo showSectionHead('Plugin Settings'); ?>
-<?php if(!empty($saved)) showSuccessMsg("Plugin settings saved successfully!
-
-", false); ?>
+<?php echo showSectionHead($spTextPanel['Settings']); ?>
+<?php if(!empty($saved)) showSuccessMsg($spSettingsText['allsettingssaved'], false); ?>
 <form id="updateSettings">
 <input type="hidden" value="update" name="sec">
 <table id="cust_tab">
 	<tr class="form_head">
-		<th width='30%'><?php echo 'Plugin Settings'?></th>
+		<th width='30%'><?php echo $spTextPanel['Settings']?></th>
 		<th>&nbsp;</th>
 	</tr>
 	<?php 
@@ -39,7 +37,7 @@
 
 		?>
      	<tr class="form_data">
-			<td><?php echo $listInfo['set_label']?>:</td>
+			<td><?php echo $pluginText[$listInfo['set_name']]?>:</td>
 		 	<?php if($listInfo['set_type'] != 'text'){?>
 				<?php if($listInfo['set_type'] == 'bool'){?>
 				<td class="td_right_col">

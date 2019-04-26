@@ -6,40 +6,51 @@
  */
 class SD_Manager extends SeoDiary {
 	
-	/*
-	 * show projects list to manage
-	 */
-
 	var $cronJob = false;
+	var $statusList;
 
+	function __construct() {
+		parent::__construct();
+		parent::initPlugin(true);
+		$this->statusList = array(
+			'new' => $this->pluginText['New'],
+			'closed' => $this->pluginText['Closed'],
+			'cancelled' => $this->pluginText['Cancelled'],
+			'inprogress' => $this->pluginText['Inprogress'],
+			'blocked' => $this->pluginText['Blocked'],
+			'feedback' => $this->pluginText['Feedback'],
+		);
+	}
+	
 	function showSDList($info = "") {
 		$userId = isLoggedIn ();
 		$this->set ( 'post', $info );
+		$cond = "";
 		
 		if (isAdmin ()) {
 			$this->set ( 'isAdmin', 1 );
 		} else {
 			$cond .= " and d.assigned_user_id=$userId";
-			
 			$this->set ( 'isAdmin', 0 );
 		}
 		
-		$cond .= ! empty ( $info ['project_id'] ) ? " and d.project_id=" . intval ( $info ['project_id'] ) : "";
-		$cond .= ! empty ( $info ['category_id'] ) ? " and d.category_id=" . intval ( $info ['category_id'] ) : "";
-		$cond .= ! empty ( $info ['assigned_user_id'] ) ? " and d.assigned_user_id=" . intval ( $info ['assigned_user_id'] ) : "";
-		$cond .= ! empty ( $info ['keyword'] ) ? " and (title LIKE '%" . addslashes ( $info ['keyword'] ) . "%' OR d.description LIKE '%" . addslashes ( $info ['keyword'] ) . "%')" : "";
-		$cond .= ! empty ( $info ['status'] ) ? " and d.status=" . intval ( $info ['status'] ) : "";
-		$cond .= ! empty ( $info ['sort_col'] ) ? " order by " . addslashes ( $info ['sort_col'] ) : "";
-		$cond .= ! empty ( $info ['sort_val'] ) ? " " . addslashes ( $info ['sort_val'] ) : "";
+		$cond .= !empty( $info ['project_id'] ) ? " and d.project_id=" . intval ( $info ['project_id'] ) : "";
+		$cond .= !empty( $info ['category_id'] ) ? " and d.category_id=" . intval ( $info ['category_id'] ) : "";
+		$cond .= !empty( $info ['assigned_user_id'] ) ? " and d.assigned_user_id=" . intval ( $info ['assigned_user_id'] ) : "";
+		$cond .= !empty( $info ['keyword'] ) ? " and (title LIKE '%" . addslashes ( $info ['keyword'] ) . "%' OR d.description LIKE '%" . addslashes ( $info ['keyword'] ) . "%')" : "";
+		$cond .= !empty( $info ['status'] ) ? " and d.status='" . addslashes( $info ['status'] ) ."'" : "";
+		$cond .= !empty( $info ['sort_col'] ) ? " order by " . addslashes ( $info ['sort_col'] ) : "";
+		$cond .= !empty( $info ['sort_val'] ) ? " " . addslashes ( $info ['sort_val'] ) : "";
 		
 		$info ['user_id'] = intval ( $info ['assigned_user_id'] );
 		$pgScriptPath = PLUGIN_SCRIPT_URL . "&action=diaryManager";
-		$sql = "select d.*,p.name project_name, c.label category_label from sd_seo_diary d, sd_category c, sd_projects p where d.project_id=p.id and d.category_id=c.id $cond ";
+		$sql = "select d.*,p.name project_name, c.label category_label from sd_seo_diary d, sd_category c, sd_projects p 
+			where d.project_id=p.id and d.category_id=c.id $cond ";
 		
 		$userCtrler = new UserController ();
 		$userList = $userCtrler->__getAllUsers ();
-		$this->set ( 'userList', $userList );
-		$userIdList = [ ];
+		$this->set( 'userList', $userList );
+		$userIdList = [];
 		
 		foreach ( $userList as $userInfo ) {
 			$userIdList [$userInfo ['id']] = $userInfo;
@@ -53,15 +64,13 @@ class SD_Manager extends SeoDiary {
 		
 		$categoryList = $this->selectDiaryCategory ();
 		$this->set ( 'categoryList', $categoryList );
-		
-		$statusList = $this->selectDiaryStatus ();
-		$this->set ( 'statusList', $statusList );
+		$this->set( 'statusList', $this->statusList);
 		
 		// pagination setup
 		$this->db->query ( $sql, true );
 		$this->paging->setDivClass ( 'pagingdiv' );
 		$this->paging->loadPaging ( $this->db->noRows, SP_PAGINGNO );
-		$pagingDiv = $this->paging->printPages ( $pgScriptPath, '', 'scriptDoLoad', 'content', 'layout=ajax' );
+		$pagingDiv = $this->paging->printPages ( $pgScriptPath, 'searchform', 'scriptDoLoadPost', 'content', '');
 		$this->set ( 'pagingDiv', $pagingDiv );
 		$sql .= " limit " . $this->paging->start . "," . $this->paging->per_page;
 		
@@ -143,7 +152,7 @@ class SD_Manager extends SeoDiary {
 	 */
 	function editDiary($diaryId, $listInfo = '') {
 		
-		if (! empty ( $diaryId )) {
+		if (!empty( $diaryId )) {
 			
 			if (empty ( $listInfo )) {
 				$listInfo = $this->__getDiaryInfo ( $diaryId );
@@ -330,23 +339,18 @@ class SD_Manager extends SeoDiary {
 	function showTaskList($info = "") {
 		$this->set ( 'post', $info );
 		$userId = isLoggedIn ();
-		if (isAdmin ()) {
-			$this->set ( 'isAdmin', 1 );
-		} else {
-			$cond .= " and d.assigned_user_id=$userId";
-			
-			$this->set ( 'isAdmin', 0 );
-		}
+		$cond .= " and d.assigned_user_id=$userId";
 		
-		$cond .= ! empty ( $info ['project_id'] ) ? " and d.project_id=" . intval ( $info ['project_id'] ) : "";
-		$cond .= ! empty ( $info ['keyword'] ) ? " and (title LIKE '%" . addslashes ( $info ['keyword'] ) . "%' OR d.description LIKE '%" . addslashes ( $info ['keyword'] ) . "%')" : "";
-		$cond .= ! empty ( $info ['status'] ) ? " and d.status=" . intval ( $info ['status'] ) : "";
-		$cond .= ! empty ( $info ['sort_col'] ) ? " order by " . addslashes ( $info ['sort_col'] ) : "";
-		$cond .= ! empty ( $info ['sort_val'] ) ? " " . addslashes ( $info ['sort_val'] ) : "";
+		$cond .= !empty( $info ['project_id'] ) ? " and d.project_id=" . intval ( $info ['project_id'] ) : "";
+		$cond .= !empty( $info ['keyword'] ) ? " and (title LIKE '%" . addslashes ( $info ['keyword'] ) . "%' OR d.description LIKE '%" . addslashes ( $info ['keyword'] ) . "%')" : "";
+		$cond .= !empty( $info ['status'] ) ? " and d.status='" . addslashes( $info ['status'] ) ."'" : "";
+		$cond .= !empty( $info ['sort_col'] ) ? " order by " . addslashes ( $info ['sort_col'] ) : "";
+		$cond .= !empty( $info ['sort_val'] ) ? " " . addslashes ( $info ['sort_val'] ) : "";
 		
 		$info ['user_id'] = intval ( $info ['assigned_user_id'] );
-		$pgScriptPath = PLUGIN_SCRIPT_URL . "&action=diaryManager";
-		$sql = "select d.*,p.name project_name, c.label category_label from sd_seo_diary d, sd_category c, sd_projects p where d.project_id=p.id and d.category_id=c.id $cond ";
+		$pgScriptPath = PLUGIN_SCRIPT_URL . "&action=myTasks";
+		$sql = "select d.*,p.name project_name, c.label category_label from sd_seo_diary d, sd_category c, sd_projects p 
+			where d.project_id=p.id and d.category_id=c.id $cond ";
 		
 		$userCtrler = new UserController ();
 		$userList = $userCtrler->__getAllUsers ();
@@ -365,20 +369,18 @@ class SD_Manager extends SeoDiary {
 		
 		$categoryList = $this->selectDiaryCategory ();
 		$this->set ( 'categoryList', $categoryList );
-		
-		$statusList = $this->selectDiaryStatus ();
-		$this->set ( 'statusList', $statusList );
+		$this->set ( 'statusList', $this->statusList );
 		
 		// pagination setup
 		$this->db->query ( $sql, true );
 		$this->paging->setDivClass ( 'pagingdiv' );
 		$this->paging->loadPaging ( $this->db->noRows, SP_PAGINGNO );
-		$pagingDiv = $this->paging->printPages ( $pgScriptPath, '', 'scriptDoLoad', 'content', 'layout=ajax' );
+		$pagingDiv = $this->paging->printPages ( $pgScriptPath, 'searchform', 'scriptDoLoadPost', 'content', '');
 		$this->set ( 'pagingDiv', $pagingDiv );
 		$sql .= " limit " . $this->paging->start . "," . $this->paging->per_page;
 		
-		$projectList = $this->db->select ( $sql );
-		$this->set ( 'list', $projectList );
+		$taskList = $this->db->select ( $sql );
+		$this->set ( 'list', $taskList );
 		$this->set ( 'pageNo', $_GET ['pageno'] );
 		$this->pluginRender ( 'my_task' );
 	}
@@ -398,12 +400,12 @@ class SD_Manager extends SeoDiary {
 	function __selectDiaryName($condtions = '') {
 		$sql = "select id, title, description from sd_seo_diary";
 		if (! $isAdminCheck || ! isAdmin ()) {
-			if (! empty ( $userId ))
+			if (!empty( $userId ))
 				$sql .= " and project_id=" . intval ( $userId );
 		}
 		
 		// if search string is not empty
-		if (! empty ( $searchName )) {
+		if (!empty( $searchName )) {
 			$sql .= " and (title like '%" . addslashes ( $searchName ) . "%' or url like '%" . addslashes ( $searchName ) . "%')";
 		}
 		
@@ -438,16 +440,6 @@ class SD_Manager extends SeoDiary {
 		$sql .= empty ( $condtions ) ? "" : $condtions;
 		$countList = $this->db->select ( $sql, true );
 		return $countList;
-	}
-	
-	/*
-	 * func to get all status
-	 */
-	function selectDiaryStatus($condtions = '') {
-		$sql = "select id, status from sd_seo_diary ";
-		$sql .= empty ( $condtions ) ? "" : $condtions;
-		$statusList = $this->db->select ( $sql );
-		return $statusList;
 	}
 	
 	/*

@@ -28,6 +28,8 @@ class SeoDiary extends SeoPluginsController {
 		$this->setPluginTextsForRender ( $this->textCategory, $this->textTable );
 		$this->set ( 'pluginText', $this->pluginText );
 		$this->set ( 'spTextPanel', $this->getLanguageTexts('panel', $_SESSION['lang_code']));
+        $settingsCtrler = $this->createHelper('SDSettings');
+        $settingsCtrler->defineAllPluginSystemSettings();
 		
 		if (! defined ( 'PLUGIN_PATH' )) {
 			define ( 'PLUGIN_PATH', $this->pluginPath );
@@ -38,7 +40,11 @@ class SeoDiary extends SeoPluginsController {
 	 * function to show the first page while access plugin
 	 */
 	function index($data) {
-		$this->projectManager( $data );
+		if (isAdmin() || SD_ALLOW_USER_PROJECTS) {
+			$this->projectManager( $data );
+		} else {
+			$this->myTasks($data);
+		}
 	}
 	
 	function projectManager($data) {

@@ -21,9 +21,9 @@ class SDSettings extends SeoDiary{
 	 * function to show ld plugin settings
 	 */
 	function showSDPluginSettings() {
-		$settingsList = $this->__getAllSDSettings();
+		$settingsList = $this->__getAllSDSettings(true);
 		$this->set( 'settingsList', $settingsList );
-		$this->set( 'isAdmin', 1 );
+		$this->set("spSettingsText", $this->getLanguageTexts('settings', $_SESSION['lang_code']));
 		$this->pluginRender('showsdsettings');
 	}
 
@@ -34,21 +34,31 @@ class SDSettings extends SeoDiary{
 		
 		$settingsList = $this->__getAllSDSettings(true);
 		foreach($settingsList as $setInfo){
-			
 			switch($setInfo['set_name']){
-				
-				case "SD_ENABLE_EMAIL_NOTIFICATION":
-				case "SD_ALLOW_USER_PROJECTS":
+				default:
 					$postInfo[$setInfo['set_name']] = intval($postInfo[$setInfo['set_name']]);
 					break;
 			}
 			
-			$sql = "update sd_settings set set_val='".addslashes($postInfo[$setInfo['set_name']])."' where set_name='".addslashes($setInfo['set_name'])."'";
+			$sql = "update sd_settings set set_val='".addslashes($postInfo[$setInfo['set_name']])."' 
+					where set_name='".addslashes($setInfo['set_name'])."'";
 			$this->db->query($sql);
 		}
 		
 		$this->set('saved', 1);
 		$this->showSDPluginSettings();
+	}
+	
+	/*
+	 * function set all plugin settings
+	 */
+	function defineAllPluginSystemSettings() {		
+		$settingsList = $this->__getAllSDSettings();		
+		foreach($settingsList as $settingsInfo){
+			if(!defined($settingsInfo['set_name'])){
+				define($settingsInfo['set_name'], $settingsInfo['set_val']);
+			}
+		}				
 	}
 	
 }

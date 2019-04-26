@@ -90,8 +90,7 @@ CREATE TABLE `sd_settings` (
 --
 
 INSERT INTO `sd_settings` (`id`, `set_label`, `set_name`, `set_val`, `set_type`, `display`) VALUES
-(1, 'Allow user to access project manager', 'SD_ALLOW_USER_PROJECTS', '0', 'bool', 1),
-(2, 'Enable Email notification', 'SD_ENABLE_EMAIL_NOTIFICATION', '1', 'bool', 1);
+(1, 'Allow user to access project manager', 'SD_ALLOW_USER_PROJECTS', '0', 'bool', 1);
 
 --
 -- Indexes for dumped tables
@@ -188,6 +187,14 @@ ALTER TABLE `sd_projects` ADD CONSTRAINT `sd_project_website_id_delete` FOREIGN 
 (`id`) ON DELETE CASCADE ON UPDATE NO ACTION ;
 
 INSERT INTO `texts` ( `category`, `label`, `content`) VALUES
+('seodiary', 'SD_ALLOW_USER_PROJECTS', 'Allow user to access project manager'),
+('seodiary', 'New', 'New'),
+('seodiary', 'New', 'New'),
+('seodiary', 'Closed', 'Closed'),
+('seodiary', 'Cancelled', 'Cancelled'),
+('seodiary', 'Inprogress', 'Inprogress'),
+('seodiary', 'Blocked', 'Blocked'),
+('seodiary', 'Feedback', 'Feedback'),
 ('seodiary', 'Due Date', 'Due Date'),
 ('seodiary', 'Ascending', 'Ascending'),
 ('seodiary', 'Descending', 'Descending'),

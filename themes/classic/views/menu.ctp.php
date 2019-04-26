@@ -11,12 +11,11 @@ $spTextSA = $pluginCtrler->getLanguageTexts('siteauditor', $_SESSION['lang_code'
         <li><a href="javascript:void(0);" onclick="<?php echo pluginMenu('action=diaryManager'); ?>"><?php echo $pluginText['Diary Manager']?></a></li>
     <?php } ?>
     
+    <li><a href="javascript:void(0);" onclick="<?php echo pluginMenu('action=myTasks'); ?>"><?php echo $pluginText['My Tasks']?></a></li>
     <li><a href="javascript:void(0);" onclick="<?php echo pluginMenu('action=newComment'); ?>"><?php echo $pluginText['Diary Comments']?></a></li>
     
     <?php if(isAdmin()) {?>
         <li><a href="javascript:void(0);" onclick="<?php echo pluginMenu('action=settings'); ?>"><?php echo $spTextPanel['Settings']?></a></li>
     <?php } ?>
     
-    <li><a href="javascript:void(0);" onclick="<?php echo pluginMenu('action=myTasks'); ?>"><?php echo $pluginText['My Tasks']?></a></li>
-    <li><a href="javascript:void(0);" onclick="<?php echo pluginMenu('action=cronJob'); ?>"><?php echo 'Cron Job'?></a></li>
 </ul>

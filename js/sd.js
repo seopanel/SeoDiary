@@ -6,13 +6,17 @@ function doPluginAction(scriptUrl, scriptPos, scriptArgs, actionDiv) {
 			break;
 		
 		case "editProject":
+		case "projectSummery":
+		case "diaryManager":
+		case "editDiary":
+		case "newComment":
 			scriptDoLoad(scriptUrl, scriptPos, scriptArgs);
 			break;
 	
 		default:
 			/* check whether the system is demo or not */
 			if(spdemo){
-				if((actVal == 'deletePorject') || (actVal == 'Activate') || (actVal == 'Inactivate')){
+				if((actVal == 'deleteProject') || (actVal == 'Activate') || (actVal == 'Inactivate') || (actVal == 'deleteDiary')){
 					alertDemoMsg();
 					return false;
 				}
