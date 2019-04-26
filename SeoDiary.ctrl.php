@@ -38,7 +38,7 @@ class SeoDiary extends SeoPluginsController {
 	 * function to show the first page while access plugin
 	 */
 	function index($data) {
-		$this->projectManager ( $data );
+		$this->projectManager( $data );
 	}
 	
 	function projectManager($data) {

@@ -6,6 +6,14 @@
  */
 class Project extends SeoDiary {
 	
+	var $spTextSA;
+	var $spTextPanel;
+	
+	function __construct() {
+		parent::__construct();
+		$this->spTextSA = $this->getLanguageTexts('siteauditor', $_SESSION['lang_code']);
+	}
+	
 	/*
 	 * show projects list to manage
 	 */
@@ -47,9 +55,10 @@ class Project extends SeoDiary {
 		$projectList = $this->db->select( $sql );
 		$this->set( 'list', $projectList );
 		$this->set( 'pageNo', $_GET ['pageno'] );
-		$this->set('spTextSA', $this->getLanguageTexts('siteauditor', $_SESSION['lang_code']));
+		$this->set('spTextSA', $this->spTextSA);
 		$this->pluginRender( 'show_projects_manager' );
 	}
+	
 	/*
 	 * func to create new project
 	 */
@@ -66,27 +75,21 @@ class Project extends SeoDiary {
 	 */
 	function createProject($listInfo) {
 
-		if (isAdmin()) {
-			$websiteId = empty($listInfo['website_id']) ? isLoggedIn() : intval($listInfo['website_id']);	
-		} else {
-			$websiteId = isLoggedIn();
-		}
-
 		$this->set( 'post', $listInfo );
 		$errMsg ['website_id'] = formatErrorMsg( $this->validate->checkBlank( $listInfo ['website_id'] ) );
 		$errMsg ['name'] = formatErrorMsg( $this->validate->checkBlank( $listInfo ['name'] ) );
 		$errMsg ['description'] = formatErrorMsg( $this->validate->checkBlank( $listInfo ['description'] ) );
 		
-		if(! $this->validate->flagErr) {
-			
-			if(! $this->__checkProject( $listInfo ['website_id'] , $websiteId)) {
+		if(! $this->validate->flagErr) {			
+			if(!$this->__checkProjectExists( $listInfo ['website_id'])) {
 				$sql = "insert into sd_projects(website_id, name,description,status)
-								values(" . intval( $listInfo ['website_id'] ) . ", '" . addslashes( $listInfo ['name'] ) . "','" . addslashes( $listInfo ['description'] ) . "',1)";
+					values(" . intval( $listInfo ['website_id'] ) . ", '" . addslashes( $listInfo ['name'] ) . "','" 
+					. addslashes( $listInfo ['description'] ) . "',1)";
 				$this->db->query( $sql );
 				$this->showProjectsManager();
 				exit();
 			} else {
-				$errMsg ['name'] = formatErrorMsg( 'Project already exist on this website' );
+				$errMsg ['name'] = formatErrorMsg( $this->spTextSA['projectalreadyexist'] );
 			}
 		}
 		
@@ -100,7 +103,7 @@ class Project extends SeoDiary {
 	function editProject($projectId, $listInfo = '') {
 		$userId = isLoggedIn();
 		
-		if(! empty( $projectId )) {
+		if(!empty( $projectId )) {
 			
 			if(empty( $listInfo )) {
 				$listInfo = $this->__getProjectInfo( $projectId );
@@ -119,25 +122,19 @@ class Project extends SeoDiary {
 	 */
 	function updateProject($listInfo) {
 
-		if (isAdmin()) {
-			$websiteId = empty($listInfo['website_id']) ? isLoggedIn() : intval($listInfo['website_id']);	
-		} else {
-			$websiteId = isLoggedIn();
-		}
 		$this->set( 'post', $listInfo );
 		$errMsg ['website_id'] = formatErrorMsg( $this->validate->checkBlank( $listInfo ['website_id'] ) );
 		$errMsg ['name'] = formatErrorMsg( $this->validate->checkBlank( $listInfo ['name'] ) );
 		$errMsg ['description'] = formatErrorMsg( $this->validate->checkBlank( $listInfo ['description'] ) );
 		
-		if(! $this->validate->flagErr) {
+		if(! $this->validate->flagErr) {			
 			
-			if($this->__checkProject( $listInfo ['name'], $websiteId )) {
-				$errMsg ['name'] = formatErrorMsg( 'Project already exist' );
+			if($this->__checkProjectExists($listInfo['website_id'], $listInfo ['id'] )) {
 				$this->validate->flagErr = true;
+				$errMsg ['name'] = formatErrorMsg( $this->spTextSA['projectalreadyexist'] );
 			}
 			
-			if(! $this->validate->flagErr) {
-				
+			if(! $this->validate->flagErr) {				
 				$sql = "update sd_projects set
 								website_id = " . intval( $listInfo ['website_id'] ) . ",
 								name = '" . addslashes( $listInfo ['name'] ) . "',
@@ -172,27 +169,17 @@ class Project extends SeoDiary {
 		$sql = "update sd_projects set status=$status where id=$projectId";
 		$this->db->query( $sql );
 	}
-	
-	/*
-	 * function to check name of project already existing
-	 */
-	function __checkName($name, $projectId = 0) {
-		$projectId = intval( $projectId );
-		$sql = "select id from sd_projects where name='" . addslashes( $name ) . "'";
-		$sql .= ! empty( $projectId ) ? " and id!=$projectId" : "";
-		$listInfo = $this->db->select( $sql, true );
-		return empty( $listInfo ['id'] ) ? false : $listInfo ['id'];
-	}
 
 	/*
 	 * function to check name of project already existing
 	 */
-	function __checkProject($websiteId = 0) {
+	function __checkProjectExists($websiteId, $projectId = 0) {
 		$websiteId = intval( $websiteId );
-		$sql = "select id from sd_projects where website_id='" . addslashes( $websiteId ) . "'";
-		$sql .= empty( $websiteId ) ? " and id=$websiteId" : "";
+		$projectId = intval($projectId);
+		$sql = "select id from sd_projects where website_id=$websiteId";
+		$sql .= !empty( $projectId ) ? " and id!=$projectId" : "";
 		$listInfo = $this->db->select( $sql, true );
-		return empty( $listInfo ['id'] ) ? false : $listInfo ['id'];
+		return !empty( $listInfo ['id'] ) ? $listInfo ['id'] : false;
 	}
 	
 	/*

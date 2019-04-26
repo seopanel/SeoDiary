@@ -1,13 +1,13 @@
-<?php echo showSectionHead('Edit Project'); ?>
+<?php echo showSectionHead($spTextPanel['Edit Project']); ?>
 <form id="projectform">
 <input type="hidden" name="id" value="<?php echo $post['id']?>"/>
 <table id="cust_tab">
 	<tr class="form_head">
-		<th width='30%'><?php echo 'Edit Project'?></th>
+		<th width='30%'><?php echo $spTextPanel['Edit Project']?></th>
 		<th>&nbsp;</th>
 	</tr>	
 	<tr class="form_data">
-		<td><?php echo 'Website'?>:</td>
+		<td><?php echo $spText['common']['Website']?>:</td>
 		<td>
 			<select name="website_id">
 				<?php foreach($websiteList as $websiteInfo){?>
@@ -26,7 +26,7 @@
 		<td><input type="text" name="name" value="<?php echo $post['name']?>"><?php echo $errMsg['name']?></td>
 	</tr>
 	<tr class="form_data">
-		<td><?php echo 'Description'?>:</td>
+		<td><?php echo $spText['label']['Description']?>:</td>
 		<td>
 			<textarea name="description"><?php echo $post['description']?></textarea>
 			<br>

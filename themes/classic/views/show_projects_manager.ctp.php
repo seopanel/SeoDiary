@@ -1,6 +1,4 @@
-<?php
-echo showSectionHead($pluginText["Projects Manager"]);
-?>
+<?php echo showSectionHead($pluginText["Projects Manager"]); ?>
 <?php if(!empty($isAdmin)){ ?>
 	<table width="50%" class="search">
 		<tr>
