@@ -181,16 +181,6 @@ class Project extends SeoDiary {
 		$listInfo = $this->db->select( $sql, true );
 		return !empty( $listInfo ['id'] ) ? $listInfo ['id'] : false;
 	}
-	
-	/*
-	 * func to get all projects
-	 */
-	function getAllProjects($condtions = '') {
-		$sql = "select p.*,w.name as website_name from sd_projects p,websites w where p.website_id=w.id ";
-		$sql .= empty( $condtions ) ? "" : $condtions;
-		$projectList = $this->db->select( $sql );
-		return $projectList;
-	}
 
 	function __getAllProjects($userId = '', $isAdminCheck = false, $searchName = '') {
 		$sql = "select p.*,w.name as website_name from sd_projects p,websites w where p.website_id=w.id ";

@@ -27,11 +27,18 @@ class SD_Manager extends SeoDiary {
 		$this->set ( 'post', $info );
 		$cond = "";
 		
-		if (isAdmin ()) {
-			$this->set ( 'isAdmin', 1 );
-		} else {
-			$cond .= " and d.assigned_user_id=$userId";
-			$this->set ( 'isAdmin', 0 );
+		$projectCtrler = $this->createHelper ( 'Project' );
+		$projectList = $projectCtrler->__getAllProjects ( $userId, true );
+		$this->set ( 'projectList', $projectList );
+		
+		if (!isAdmin ()) {
+		    if (SD_ALLOW_USER_PROJECTS) {
+		        $prjIdList = [0];
+		        foreach ($projectList as $projectInfo) $prjIdList[] = $projectInfo['id'];
+		        $cond .= " and d.project_id in (".implode(',', $prjIdList).")";
+		    } else {
+		        $cond .= " and d.assigned_user_id=$userId";
+		    }
 		}
 		
 		$cond .= !empty( $info ['project_id'] ) ? " and d.project_id=" . intval ( $info ['project_id'] ) : "";
@@ -57,11 +64,6 @@ class SD_Manager extends SeoDiary {
 		}
 		
 		$this->set ( 'userIdList', $userIdList );
-		
-		$projectCtrler = $this->createHelper ( 'Project' );
-		$projectList = $projectCtrler->__getAllProjects ( $userId, true );
-		$this->set ( 'projectList', $projectList );
-		
 		$categoryList = $this->selectDiaryCategory ();
 		$this->set ( 'categoryList', $categoryList );
 		$this->set( 'statusList', $this->statusList);
@@ -84,8 +86,6 @@ class SD_Manager extends SeoDiary {
 	 * func to create new project
 	 */
 	function newDiary($info = '') {
-		
-		// get all users
 		$userId = isLoggedIn ();
 		$userCtrler = new UserController ();
 		$userList = $userCtrler->__getAllUsers ();
@@ -97,54 +97,78 @@ class SD_Manager extends SeoDiary {
 		
 		$categoryList = $this->selectDiaryCategory ();
 		$this->set ( 'categoryList', $categoryList );
-		$this->set ( 'isAdmin', 1 );
-		
+		$this->set( 'statusList', $this->statusList);
+		$this->set ( 'spTextReport', $this->getLanguageTexts('report', $_SESSION['lang_code']));
 		$this->pluginRender ( 'new_diary' );
 	}
 	
 	/*
-	 * func to create project
+	 * func to create diary
 	 */
 	function createDiary($listInfo) {
-		$this->set ( 'post', $listInfo );
+	    $this->set ( 'post', $listInfo );
+	    $now = date('Y-m-d H:i:s');
 		$errMsg ['project_id'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['project_id'] ) );
 		$errMsg ['category_id'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['category_id'] ) );
 		$errMsg ['title'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['title'] ) );
 		$errMsg ['description'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['description'] ) );
-		$errMsg ['assigned_user_id'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['assigned_user_id'] ) );
-		$errMsg ['due_date'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['due_date'] ) );
 		$errMsg ['status'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['status'] ) );
-		if (isAdmin () || SD_ENABLE_EMAIL_NOTIFICATION) {
-			$userId = $listInfo ['assigned_user_id'];
-			$subject = "your have one new assingned diary ";
-			$content = $this->pluginRender('mailview', 'ajax', false);
-			$userController = new UserController ();
-			$userInfo = $userController->__getUserInfo ( $userId );
-			$adminInfo = $userController->__getAdminInfo ();
-			$userName = $userInfo ['first_name'] . "-" . $userInfo ['last_name'];
-			$this->set ( 'userName', $userName );
-			
-			if (! sendMail ( $adminInfo ['email'], $userName, $userInfo ['email'], $subject, $content )) {
-				echo "Notifiaction Mail send successfully to " . $userInfo ['email'] . "\n";
-				} else {
-					echo 'An internal error occured while sending mail!';
-			}
-		}
 		
 		if (! $this->validate->flagErr) {
-			
-			$sql = "INSERT INTO `sd_seo_diary`(`project_id`, `assigned_user_id`, `category_id`, `title`, `description`, `due_date`, `status`) 
-					VALUES('" . intval ( $listInfo ['project_id'] ) . "', '" . addslashes ( $listInfo ['assigned_user_id'] ) . "', 
-					'" . addslashes ( $listInfo ['category_id'] ) . "',  '" . addslashes ( $listInfo ['title'] ) . "',
-					'" . addslashes ( $listInfo ['description'] ) . "', '" . addslashes ( $listInfo ['due_date'] ) . "',
-					'" . addslashes ( $listInfo ['status'] ) . "')";
-			$this->db->query ( $sql );
-			$this->showSDList ();
-			exit ();
+		    
+		    if ($this->__checkTitle ($listInfo ['title'], $listInfo ['project_id'] )) {
+		        $errMsg ['title'] = formatErrorMsg ($this->pluginText['Diary already exist']);
+		        $this->validate->flagErr = true;
+		    }
+		    
+		    if (!$this->validate->flagErr) {
+    		    $listInfo['created_user_id'] = isLoggedIn();
+    		    $listInfo['update_time'] = $now;
+    		    $listInfo['creation_time'] = $now;
+    			$this->insertDiary($listInfo);
+    			$this->showSDList(['keyword' => $listInfo ['title']]);
+    			exit();
+		    }
 		}
 		
-		$this->set ( 'errMsg', $errMsg );
-		$this->newDiary ( $listInfo );
+		$this->set('errMsg', $errMsg );
+		$this->newDiary( $listInfo );
+	}	
+	
+	function insertDiary($listInfo) {
+	    $sql = "INSERT INTO `sd_seo_diary`(`project_id`, `assigned_user_id`, `category_id`, `title`, `description`, `due_date`, `status`, 
+                    `email_notification`, `creation_time`, `update_time`, `created_user_id`)
+					VALUES('" . intval ( $listInfo ['project_id'] ) . "', '" . intval ( $listInfo ['assigned_user_id'] ) . "',
+					'" . intval ( $listInfo ['category_id'] ) . "',  '" . addslashes ( $listInfo ['title'] ) . "',
+					'" . addslashes ( $listInfo ['description'] ) . "', '" . addslashes ( $listInfo ['due_date'] ) . "',
+					'" . addslashes ( $listInfo ['status'] ) . "', ".intval($listInfo['email_notification']).", 
+                    '" . addslashes ( $listInfo ['creation_time'] ) . "', '" . addslashes ( $listInfo ['creation_time'] ) . "', ".intval($listInfo['created_user_id']).")";
+	    $this->db->query( $sql );
+	    
+	    // email notification enabled, send mail
+	    if (!empty($listInfo['email_notification']) && !empty($listInfo ['assigned_user_id'])) {
+            $this->sendNotificationMail($listInfo);        
+	    }
+	    
+	}
+	
+	function sendNotificationMail($listInfo) {
+	    $userId = $listInfo ['assigned_user_id'];
+	    $subject = $this->pluginText['Assigned to You'] . ": " . $listInfo['title'];
+	    $userController = new UserController ();
+	    $userInfo = $userController->__getUserInfo ( $userId );
+	    $userName = $userInfo ['first_name'] . "-" . $userInfo ['last_name'];
+	    $adminInfo = $userController->__getAdminInfo();
+	    $adminName = $adminInfo['first_name']."-".$adminInfo['last_name'];
+	    $this->set ( 'userName', $userName );
+	    $this->set ( 'listInfo', $listInfo);
+	    $content = $this->getPluginViewContent('notification_mail');
+	    
+	    if (sendMail( $adminInfo ['email'], $adminName, $userInfo['email'], $subject, $content )) {
+	        showSuccessMsg("Notifiaction Mail send successfully to " . $userInfo ['email'], FALSE);
+	    } else {
+	        showErrorMsg('An internal error occured while sending mail!', FALSE);
+	    }
 	}
 	
 	/*
@@ -154,12 +178,11 @@ class SD_Manager extends SeoDiary {
 		
 		if (!empty( $diaryId )) {
 			
-			if (empty ( $listInfo )) {
+			if (empty($listInfo )) {
 				$listInfo = $this->__getDiaryInfo ( $diaryId );
 			}
 			
 			$this->set ( 'post', $listInfo );
-			
 			$userCtrler = new UserController ();
 			$userList = $userCtrler->__getAllUsers ();
 			$this->set ( 'userList', $userList );
@@ -171,8 +194,8 @@ class SD_Manager extends SeoDiary {
 			
 			$categoryList = $this->selectDiaryCategory ();
 			$this->set ( 'categoryList', $categoryList );
-			$this->set ( 'isAdmin', 1 );
-			
+			$this->set( 'statusList', $this->statusList);
+			$this->set ( 'spTextReport', $this->getLanguageTexts('report', $_SESSION['lang_code']));
 			$this->pluginRender ( 'edit_diary' );
 		}
 	}
@@ -180,103 +203,105 @@ class SD_Manager extends SeoDiary {
 	/*
 	 * func to update project
 	 */
-	function updateDiary($listInfo) {
-		
-		if (isAdmin ()) {
-			$diaryId = empty ( $listInfo ['project_id'] ) ? isLoggedIn () : intval ( $listInfo ['project_id'] );
-		} else {
-			$diaryId = isLoggedIn ();
-		}
-		
+	function updateDiary($listInfo) {		
 		$this->set ( 'post', $listInfo );
-		
+		$errMsg = [];
 		$errMsg ['project_id'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['project_id'] ) );
 		$errMsg ['category_id'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['category_id'] ) );
 		$errMsg ['title'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['title'] ) );
 		$errMsg ['description'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['description'] ) );
-		$errMsg ['assigned_user_id'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['assigned_user_id'] ) );
-		$errMsg ['due_date'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['due_date'] ) );
 		$errMsg ['status'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['status'] ) );
+		
 		if (! $this->validate->flagErr) {
 			
-			if ($this->__checkTitle ( $listInfo ['tile'], $diaryId )) {
-				$errMsg ['title'] = formatErrorMsg ( 'Diary already exist' );
+		    if ($this->__checkTitle ( $listInfo ['title'], $listInfo ['project_id'], $listInfo ['id'] )) {
+		        $errMsg ['title'] = formatErrorMsg ($this->pluginText['Diary already exist']);
 				$this->validate->flagErr = true;
 			}
 			
-			if (isAdmin () || SD_ENABLE_EMAIL_NOTIFICATION) {
-				$userId = $listInfo ['assigned_user_id'];
-				$subject = "your assingned diary was changed";
-				$content = $this->getViewContent('mailview', 'ajax', false);
-				$userController = new UserController ();
-				$userInfo = $userController->__getUserInfo ( $userId );
-				$adminInfo = $userController->__getAdminInfo ();
-				$userName = $userInfo ['first_name'] . "-" . $userInfo ['last_name'];
-				$this->set ( 'userName', $userName );
+			if (! $this->validate->flagErr) {
+			    $oldDiaryInfo = $this->__getDiaryInfo($listInfo ['id']);
+				$sql = "update sd_seo_diary set project_id = " . intval ( $listInfo ['project_id'] ) . ", category_id = " . intval ( $listInfo ['category_id'] ) . 
+				    ", title = '" . addslashes ( $listInfo ['title'] ) . "', description = '" . addslashes ( $listInfo ['description'] ) . 
+				    "', assigned_user_id = '" . intval ( $listInfo ['assigned_user_id'] ) . "', due_date = '" . addslashes ( $listInfo ['due_date'] ) . 
+				    "', update_time = '" . date ( "Y-m-d H:i:s" ) . "', status = '" . addslashes ( $listInfo ['status'] ) . "' where id=" . intval ( $listInfo ['id'] );
+				$this->db->query ( $sql );
 				
-				if (! sendMail ( $adminInfo ['email'], $userName, $userInfo ['email'], $subject, $content )) {
-					echo "Reports send successfully to " . $userInfo ['email'] . "\n";
-				} else {
-					echo 'An internal error occured while sending mail!';
+				// email notification enabled, send mail
+				if (!empty($listInfo['email_notification']) && !empty($listInfo ['assigned_user_id'])) {
+				    if ($oldDiaryInfo['assigned_user_id'] != $listInfo ['assigned_user_id']) {
+				        $this->sendNotificationMail($listInfo);
+				    }
 				}
+				
+				$this->showSDList(['keyword' => $listInfo ['title']]);
+				exit();
 			}
 			
-			if (! $this->validate->flagErr) {
-				
-				$sql = "update sd_seo_diary set project_id = " . intval ( $listInfo ['project_id'] ) . ", category_id = " . intval ( $listInfo ['category_id'] ) . ", title = '" . addslashes ( $listInfo ['title'] ) . "', description = '" . addslashes ( $listInfo ['description'] ) . "', assigned_user_id = '" . addslashes ( $listInfo ['assigned_user_id'] ) . "', due_date = '" . addslashes ( $listInfo ['due_date'] ) . "', update_time = '" . date ( "Y-m-d" ) . "', status = '" . addslashes ( $listInfo ['status'] ) . "' where id=" . intval ( $listInfo ['id'] );
-				$this->db->query ( $sql );
-				$this->showSDList ();
-				exit ();
-			}
 		}
+		
 		$this->set ( 'errMsg', $errMsg );
-		$this->editProject ( $listInfo ['id'], $listInfo );
+		$this->editDiary( $listInfo ['id'], $listInfo );
 	}
 	
 	/*
 	 * func to delete project
 	 */
-	function deleteDiary($project_id) {
-		$project_id = intval ( $project_id );
-		$sql = "delete from sd_seo_diary where id=" . intval ( $project_id );
+	function deleteDiary($diaryId) {
+		$diaryId = intval ( $diaryId );
+		$sql = "delete from sd_seo_diary where id=" . intval ( $diaryId );
 		$this->db->query ( $sql );
 		$this->showSDList ();
 	}
+	
+	function getUserDiaryList($userId) {
+	    $cond = "";
+	    $userId = intval($userId);
+	    
+	    if (!isAdmin()) {
+	        if (SD_ALLOW_USER_PROJECTS) {
+	            $projectCtrler = $this->createHelper ( 'Project' );
+	            $projectList = $projectCtrler->__getAllProjects ( $userId, true );
+	            $prjIdList = [0];
+	            foreach ($projectList as $projectInfo) $prjIdList[] = $projectInfo['id'];
+	            $cond .= " project_id in (".implode(',', $prjIdList).")";
+	        } else {
+	            $cond .= " assigned_user_id=$userId";
+	        }
+	    }
+	    
+	    $diaryList = $this->dbHelper->getAllRows('sd_seo_diary', $cond);
+	    return $diaryList;
+	}	
+	
 	/*
-	 * func to create new project
+	 * func to create new comments
 	 */
 	function newDiaryComments($info = '') {
 		$this->set ( 'post', $info );
-		$userId = isLoggedIn ();
+		$userId = isLoggedIn();
 		
-		$diaryNameList = $this->__selectDiaryName ();
-		$this->set ( 'diaryNameList', $diaryNameList );
+		$diaryList = $this->getUserDiaryList($userId);
+		$this->set ( 'diaryList', $diaryList );
 		
 		if (empty ( $info ['diary_id'] )) {
-			$diaryId = $diaryNameList [0] ['id'];
+		    $diaryId = $diaryList[0]['id'];
 		} else {			
-			$diaryId = $info ['diary_id'];
+			$diaryId = intval($info['diary_id']);
 		}
-		
-		$selectDiaryDesc = $this->selectDiaryDesc ( " where id=" . $diaryId );
-		$this->set ( 'selectDiaryDesc', $selectDiaryDesc );
 
+		$diaryInfo = $this->__getDiaryInfo($diaryId);
+		$this->set ('diaryInfo', $diaryInfo );
+		$this->set ('diaryId', $diaryId );
+		
 		$userCtrler = new UserController ();
-		$userList = $userCtrler->__getAllUsers ();
-		$this->set ( 'userList', $userList );
-		$userIdList = [ ];
-		
-		foreach ( $userList as $userInfo ) {
-			$userIdList [$userInfo ['id']] = $userInfo;
-		}
-		
+		$userList = $userCtrler->__getAllUsers();
+		$userIdList = [];
+		foreach ( $userList as $userInfo ) $userIdList [$userInfo ['id']] = $userInfo;
 		$this->set ( 'userIdList', $userIdList );
 		
-
-		$diaryCommentList = $this->showDiaryComments ( "where d.id=c.diary_id and d.id =" . $diaryId . " and c.user_id =" . $userId );
-		$this->set ( 'diaryCommentList', $diaryCommentList );
-		$this->set ( 'isAdmin', 1 );
-	
+		$diaryCommentList = $this->getDiaryComments( " and diary_id=" . intval($diaryId));
+		$this->set ( 'diaryCommentList', $diaryCommentList );	
 		$this->pluginRender ( 'diary_comments' );
 	}
 	
@@ -307,7 +332,7 @@ class SD_Manager extends SeoDiary {
 		$this->set ( 'diaryNameList', $diaryNameList );
 		$selectProjectDesc = $this->selectProjectDesc ( " where `id`=" . $projectId );
 		$this->set ( 'selectProjectDesc', $selectProjectDesc );
-		
+		$this->set ( 'spTextSA', $this->getLanguageTexts('siteauditor', $_SESSION['lang_code']));		
 		$this->pluginRender ( 'project_summery' );
 	}
 	
@@ -388,40 +413,13 @@ class SD_Manager extends SeoDiary {
 	/*
 	 * func to get all category type
 	 */
-	function showDiaryComments($condtions = '') {
-		$sql = "select c.*, d.id ,c.updated_time time from sd_diary_comments c, sd_seo_diary d ";
-		$sql .= empty ( $condtions ) ? "" : $condtions;
-		$diaryCommentList = $this->db->select ( $sql );
+	function getDiaryComments($condtions = '') {
+		$sql = "select * from sd_diary_comments where 1=1";
+		$sql .= empty( $condtions ) ? "" : $condtions;
+		$diaryCommentList = $this->db->select( $sql );
 		return $diaryCommentList;
 	}
-	/*
-	 * func to get all category type
-	 */
-	function __selectDiaryName($condtions = '') {
-		$sql = "select id, title, description from sd_seo_diary";
-		if (! $isAdminCheck || ! isAdmin ()) {
-			if (!empty( $userId ))
-				$sql .= " and project_id=" . intval ( $userId );
-		}
-		
-		// if search string is not empty
-		if (!empty( $searchName )) {
-			$sql .= " and (title like '%" . addslashes ( $searchName ) . "%' or url like '%" . addslashes ( $searchName ) . "%')";
-		}
-		
-		$sql .= " order by title";
-		$diaryNameList = $this->db->select ( $sql );
-		return $diaryNameList;
-	}
-	/*
-	 * func to get all diary description
-	 */
-	function selectDiaryDesc($condtions = '') {
-		$sql = "select `id`,`description` FROM `sd_seo_diary`";
-		$sql .= empty ( $condtions ) ? "" : $condtions;
-		$selectDiaryDesc = $this->db->select ( $sql );
-		return $selectDiaryDesc;
-	}
+	
 	/*
 	 * func to get all category type
 	 */
@@ -470,13 +468,14 @@ class SD_Manager extends SeoDiary {
 		$selectProjectDesc = $this->db->select ( $sql );
 		return $selectProjectDesc;
 	}
+	
 	/*
 	 * function to check name of project already existing
 	 */
-	function __checkTitle($title, $diaryId = 0) {
+	function __checkTitle($title, $projectId, $diaryId = 0) {
 		$diaryId = intval ( $diaryId );
-		$sql = "select id from sd_seo_diary where title='" . addslashes ( $title ) . "'";
-		$sql .= empty ( $diaryId ) ? " and id=$diaryId" : "";
+		$sql = "select id from sd_seo_diary where title='" . addslashes ( $title ) . "' and project_id=".intval($projectId);
+		$sql .= !empty( $diaryId ) ? " and id!=$diaryId" : "";
 		$listInfo = $this->db->select ( $sql, true );
 		return empty ( $listInfo ['id'] ) ? false : $listInfo ['id'];
 	}
@@ -489,7 +488,6 @@ class SD_Manager extends SeoDiary {
 		$info = $this->db->select ( $sql, true );
 		return $info;
 	}
-
 
 	/**
 	 * function to execute cron job
@@ -544,5 +542,6 @@ class SD_Manager extends SeoDiary {
 			             print  $content;
          }
 		}
+		
 }
 	    

@@ -187,8 +187,11 @@ ALTER TABLE `sd_projects` ADD CONSTRAINT `sd_project_website_id_delete` FOREIGN 
 (`id`) ON DELETE CASCADE ON UPDATE NO ACTION ;
 
 INSERT INTO `texts` ( `category`, `label`, `content`) VALUES
+('seodiary', 'Diary already exist', 'Diary already exist'),
+('seodiary', 'Edit Diary', 'Edit Diary'),
+('seodiary', 'New task is assigned to you in SEO Diary', 'New task is assigned to you in SEO Diary'),
+('seodiary', 'Assigned to You', 'Assigned to You'),
 ('seodiary', 'SD_ALLOW_USER_PROJECTS', 'Allow user to access project manager'),
-('seodiary', 'New', 'New'),
 ('seodiary', 'New', 'New'),
 ('seodiary', 'Closed', 'Closed'),
 ('seodiary', 'Cancelled', 'Cancelled'),

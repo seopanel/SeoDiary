@@ -1,6 +1,6 @@
 <?php echo showSectionHead($pluginText["Diary Manager"]); ?>
 <form id="searchform">
-<table class="search">
+<table class="search" width="100%">
     <tr>
 		<th><?php echo $spText['label']['Project']?>:</th>
 		<td>
@@ -108,7 +108,7 @@
                 <td><?php echo $userIdList[$listInfo['assigned_user_id']]['username']?></td>
 				<td><?php echo $statusList[$listInfo['status']]?></td>
 				<td width="100px">
-					<select name="action" id="action<?php echo $listInfo['id']?>" onchange="doPluginAction('<?php echo PLUGIN_SCRIPT_URL?>', 'content', 'project_id=<?php echo $listInfo['id']?>&pageno=<?php echo $pageNo?>', 'action<?php echo $listInfo['id']?>')">
+					<select name="action" id="action<?php echo $listInfo['id']?>" onchange="doPluginAction('<?php echo PLUGIN_SCRIPT_URL?>', 'content', 'diary_id=<?php echo $listInfo['id']?>&pageno=<?php echo $pageNo?>', 'action<?php echo $listInfo['id']?>')">
 						<option value="">-- <?php echo $spText['common']['Select']?> --</option>
 						<option value="newComment"><?php echo $spText['label']['Comments']?></option>
 						<option value="editDiary"><?php echo $spText['common']['Edit']?></option>

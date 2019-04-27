@@ -1,6 +1,5 @@
 @CHARSET "UTF-8";
 
-/*
 .container {
     border: 2px solid #dedede;
     background:   rgb(174, 214, 241);
@@ -218,4 +217,4 @@ textarea:focus {
 
 .input:focus {
   border: 3px solid #555;
-}*/
+}

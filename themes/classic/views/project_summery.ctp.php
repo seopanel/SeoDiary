@@ -1,7 +1,7 @@
-<?php echo showSectionHead($pluginText["Projects Summery"]); ?>
+<?php echo showSectionHead($spTextSA['Project Summary']); ?>
 <form id="projectform">	
 	<div id="live-chat">
-		<header class="clearfix"><?php echo $pluginText['Project Name']?>:</td>
+		<header class="clearfix"><?php echo $spText['label']['Project']?>:</td>
 			<select onchange="doDiaryAction('<?php echo PLUGIN_SCRIPT_URL?>', 'content', 'action=projectSummery', 'project_id','project_id')" name="project_id" style="width:150px;" id="project_id">
 					<?php foreach($projectList as $projectInfo){?>
 						<?php if($projectInfo['id'] == $post['project_id']){?>
@@ -11,13 +11,12 @@
 						<?php }?>						
 					<?php }?>
 			</select>
-			<?php echo $errMsg['projects_id']?>
 		</header>
 	</div>
 <div class="chat">      
     <div class="chat-history">        
         <div class="chat-message clearfix">        
-	        <div class="chat-message-content clearfix">
+	        <div class="chat-message-content clearfix">	        	
 			 	<?php
 				if(count($selectProjectDesc) > 0) {
 					foreach($selectProjectDesc as $i => $listInfo){
@@ -26,11 +25,7 @@
 					
 					<?php
 					}
-				}else{
-					?>
-					<b><?php echo $_SESSION['text']['common']['No Records Found']?></b>
-					<?php
-				} 
+				}
 				?>
 			</div>
 		</div>
@@ -51,11 +46,7 @@
 					
 					<?php
 					}
-				}else{
-					?>
-					<b><?php echo $_SESSION['text']['common']['No Records Found']?></b>
-					<?php
-				} 
+				}
 				?>
 			</div>
 		</div>	
