@@ -2,49 +2,50 @@
 <form id="projectform">
 	<div id="live-chat">
 		<header class="clearfix"><?php echo $spText['common']['Name']?>:
-			<select onchange="doDiaryAction('<?php echo PLUGIN_SCRIPT_URL?>', 'content', 'action=newComment', 'diary_id','diary_id')" name="diary_id" style="width:150px;" id="diary_id">
-					<?php foreach($diaryList as $diaryInfo){?>
-						<?php if($diaryInfo['id'] == $diaryId){?>
-							<option value="<?php echo $diaryInfo['id']?>" selected><?php echo $diaryInfo['title']?></option>
+			<select onchange="doDiaryAction('<?php echo PLUGIN_SCRIPT_URL?>', 'content', 'action=newComment', 'diary_id','diary_id')" name="diary_id" id="diary_id">
+					<?php foreach($diaryList as $drInfo){?>
+						<?php if($drInfo['id'] == $diaryId){?>
+							<option value="<?php echo $drInfo['id']?>" selected><?php echo $drInfo['title']?></option>
 						<?php }else{?>
-							<option value="<?php echo $diaryInfo['id']?>"><?php echo $diaryInfo['title']?></option>
+							<option value="<?php echo $drInfo['id']?>"><?php echo $drInfo['title']?></option>
 						<?php }?>						
 					<?php }?>
 			</select>
 		</header>
 	</div>
 	<div class="chat">      
-    <div class="chat-history">        
+    <div class="chat-history"> 
+           
         <div class="chat-message clearfix">        
 	        <div class="chat-message-content clearfix">
-				<h4><?php echo $diaryInfo['description']?></h4>
-	         </div> <!-- end chat-message-content -->
-        </div> <!-- end chat-message -->
+				<pre class="chat-desc"><?php echo $diaryInfo['description']?></pre>
+	         </div>
+        </div>
 
-    	<div class="chat-message clearfix">        
-	        <div class="chat-message-content clearfix"> 
-		        <?php
-				if(count($diaryCommentList) > 0) {
-					foreach($diaryCommentList as $i => $listInfo){
+		<?php if(count($diaryCommentList) > 0) {?>
+        	<div class="chat-message clearfix">        
+    	        <div class="chat-message-content clearfix"> 
+    		        <?php
+    				foreach($diaryCommentList as $i => $listInfo){
 						?> 
-						<div class="container "> 
+						<div class="chat-container"> 
+				              <p class="chat-desc-small"><?php echo $listInfo['comments']?></p>
+				              <div style="clear: both;"></div>
+				              <h5 class="chat-name"><?php echo $userIdList[$listInfo['user_id']]['username']?></h5>
+				              <div style="clear: both;"></div>
 				           	  <span class="chat-time"><?php echo $listInfo['updated_time']?></span>
-				              <h5><?php echo $userIdList[$listInfo['user_id']]['username']?></h5>
-				              <p><?php echo $listInfo['comments']?></p>
 				        </div>
-						<?php 
-					}
-				}else{
-				   echo $_SESSION['text']['common']['No Records Found'];
-				}
-				?>
-	        </div> <!-- end chat-message-content -->
-    	</div> <!-- end chat-message -->
-	
-		<fieldset> 
-	          <textarea name="comments" value="<?php echo $post['comments']?>" class="ui-autocomplete-input" aria-autocomplete="list" aria-haspopup="true" placeholder="Add your comment here"><?php echo $errMsg['comments']?></textarea>
-	    </fieldset>
-        <table width="100%" class="actionSec">
+						<?php
+    				}
+    				?>
+    	        </div>
+        	</div>
+    	<?php }?>
+		
+		<textarea name="comments" class="ui-autocomplete-input" aria-autocomplete="list" aria-haspopup="true" placeholder="<?php echo $pluginText['Add your comment here']?>..."><?php echo $post['comments']?></textarea>
+	    <?php echo $errMsg['comments']?>
+	    
+	    <table width="100%" class="actionSec">
         	<tr>
             	<td style="padding-top: 6px;text-align:right;">
                  	<?php $actFun1 = SP_DEMO ? "alertDemoMsg()" : pluginPOSTMethod('projectform', 'content', 'action=newComment'); ?>

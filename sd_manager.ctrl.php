@@ -284,10 +284,14 @@ class SD_Manager extends SeoDiary {
 		$diaryList = $this->getUserDiaryList($userId);
 		$this->set ( 'diaryList', $diaryList );
 		
-		if (empty ( $info ['diary_id'] )) {
+		if (empty($info['diary_id'] )) {
 		    $diaryId = $diaryList[0]['id'];
-		} else {			
+		} else {
 			$diaryId = intval($info['diary_id']);
+		}
+		
+		if (empty($diaryId)) {
+		    showErrorMsg($_SESSION['text']['common']['No Records Found']);
 		}
 
 		$diaryInfo = $this->__getDiaryInfo($diaryId);
@@ -306,7 +310,29 @@ class SD_Manager extends SeoDiary {
 	}
 	
 	/*
-	 * func to create new project
+	 * func to create project
+	 */
+	function createDiaryComment($listInfo) {
+	    $userId = isLoggedIn ();
+	    $this->set ( 'post', $listInfo );
+	    $errMsg ['diary_id'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['diary_id'] ) );
+	    $errMsg ['comments'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['comments'] ) );
+	    
+	    if (! $this->validate->flagErr) {
+	        $sql = "INSERT INTO `sd_diary_comments`( `diary_id`, `user_id`, `comments`,  `updated_time`) 
+                    VALUES ('" . intval ( $listInfo ['diary_id'] ) . "','" . intval ( $userId ) . "',
+					'" . addslashes ( $listInfo ['comments'] ) . "','". date("Y-m-d H:i:s")."')";
+	        $this->db->query ( $sql );
+	        $this->newDiaryComments(['diary_id' =>  $listInfo ['diary_id']]);
+	        exit ();
+	    }
+	    
+	    $this->set ('errMsg', $errMsg );
+	    $this->newDiaryComments ( $listInfo );
+	}
+	
+	/*
+	 * func to project shummary
 	 */
 	function showProjectSummery($info = '') {
 		$this->set ( 'post', $info );
@@ -315,47 +341,27 @@ class SD_Manager extends SeoDiary {
 		$projectList = $projectCtrler->__getAllProjects ( $userId, true );
 		$this->set ( 'projectList', $projectList );
 		
-		if (empty ( $info ['project_id'] )) {
-			$projectId = $projectList [0] ['id'];
+		if (empty($info['project_id'] )) {
+			$projectId = $projectList[0]['id'];
 		} else {
-			$projectId = $info ['project_id'];
+			$projectId = intval($info['project_id']);
 		}
 		
-		$diaryNameList = $this->selectSummery ( " WHERE d.project_id = p.id and p.id=" . $projectId );
-		
-		foreach ( $diaryNameList as $i => $listInfo ) {
-			$countList = $this->selectCommentCount ( "where diary_id= d.id and d.id=" . $listInfo ['id'] );
-			$listInfo ['comment_count'] = $countList ['comment_count'];
-			$diaryNameList [$i] = $listInfo;
+		if (empty($projectId)) {
+		    showErrorMsg($_SESSION['text']['common']['No Records Found']);
 		}
 		
-		$this->set ( 'diaryNameList', $diaryNameList );
-		$selectProjectDesc = $this->selectProjectDesc ( " where `id`=" . $projectId );
-		$this->set ( 'selectProjectDesc', $selectProjectDesc );
+		$projectInfo = $projectCtrler->__getProjectInfo($projectId);
+		$this->set('projectInfo', $projectInfo);
+		
+		$diaryList = $this->__getDiaryList(" project_id = " . intval($projectId));
+		foreach ( $diaryList as $i => $listInfo ) {
+			$diaryList[$i]['comment_count'] = $this->getDiarytCommentCount($listInfo['id']);
+		}
+		
+		$this->set ( 'diaryList', $diaryList );
 		$this->set ( 'spTextSA', $this->getLanguageTexts('siteauditor', $_SESSION['lang_code']));		
 		$this->pluginRender ( 'project_summery' );
-	}
-	
-	/*
-	 * func to create project
-	 */
-	function createDiaryComment($listInfo) {
-		$userId = isLoggedIn ();
-		$this->set ( 'post', $listInfo );
-		$errMsg ['diary_id'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['diary_id'] ) );
-		$errMsg ['comments'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['comments'] ) );
-		
-		if (! $this->validate->flagErr) {
-			
-			$sql = "INSERT INTO `sd_diary_comments`( `diary_id`, `user_id`, `comments`,  `updated_time`) VALUES ('" . intval ( $listInfo ['diary_id'] ) . "','" . addslashes ( $userId ) . "', 
-					'" . addslashes ( $listInfo ['comments'] ) . "','". date("Y-m-d H:i:s")."')";
-			$this->db->query ( $sql );
-			$this->newDiaryComments ();
-			exit ();
-		}
-		
-		$this->set ( 'errMsg', $errMsg );
-		$this->newDiaryComments ( $listInfo );
 	}
 	
 	/*
@@ -433,40 +439,9 @@ class SD_Manager extends SeoDiary {
 	/*
 	 * func to get all category type
 	 */
-	function selectCommentCount($condtions = '') {
-		$sql = "SELECT count(*) as comment_count, d.id from sd_diary_comments, sd_seo_diary d ";
-		$sql .= empty ( $condtions ) ? "" : $condtions;
-		$countList = $this->db->select ( $sql, true );
-		return $countList;
-	}
-	
-	/*
-	 * func to get all category type
-	 */
-	function selectDiaryName($condtions = '') {
-		$sql = "select id, title, description from sd_seo_diary";
-		$sql .= empty ( $condtions ) ? "" : $condtions;
-		$diaryNameList = $this->db->select ( $sql );
-		return $diaryNameList;
-	}
-	/*
-	 * func to get all category type
-	 */
-	function selectSummery($condtions = '') {
-		$sql = "select d.*,p.id project_id, d.title, d.description from sd_projects p, sd_seo_diary d ";
-		$sql .= empty ( $condtions ) ? "" : $condtions;
-		$diaryNameList = $this->db->select ( $sql );
-		return $diaryNameList;
-	}
-	
-	/*
-	 * func to get all category type
-	 */
-	function selectProjectDesc($condtions = '') {
-		$sql = "SELECT `id`, `name`, `description` FROM `sd_projects`";
-		$sql .= empty ( $condtions ) ? "" : $condtions;
-		$selectProjectDesc = $this->db->select ( $sql );
-		return $selectProjectDesc;
+	function getDiarytCommentCount($diaryId) {
+	    $diaryCountInfo = $this->dbHelper->getRow('sd_diary_comments', "diary_id=".intval($diaryId), "count(*) count");
+	    return !empty($diaryCountInfo['count']) ? $diaryCountInfo['count'] : 0;
 	}
 	
 	/*
@@ -488,11 +463,13 @@ class SD_Manager extends SeoDiary {
 		$info = $this->db->select ( $sql, true );
 		return $info;
 	}
+	
+	function __getDiaryList($cond = '') {
+	    $diaryList = $this->dbHelper->getAllRows('sd_seo_diary', $cond);
+	    return $diaryList;
+	}
 
-	/**
-	 * function to execute cron job
-	 */
-	function startCronJob() {
+	/*function startCronJob() {
 		$this->cronJob = true;
 		$sql = "SELECT `id`,`assigned_user_id`, `due_date`, `status` FROM `sd_seo_diary` WHERE `status`= 'new' or `sd_seo_diary`.`status`='inprogress'";
 		$diaryList = $this->db->select($sql);
@@ -509,9 +486,6 @@ class SD_Manager extends SeoDiary {
 
 	}
 
-	/*
-	 * function to generate Report
-	 */
 	function generateDairyList($diaryId) {	
 
 		$datetime = new DateTime(date('Y-m-d'));
@@ -541,7 +515,7 @@ class SD_Manager extends SeoDiary {
 			             print  $subject;
 			             print  $content;
          }
-		}
+		}*/
 		
 }
 	    

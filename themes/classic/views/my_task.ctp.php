@@ -1,6 +1,6 @@
 <?php echo showSectionHead($pluginText["My Tasks"]); ?>
 <form id="searchform">
-<table class="search">
+<table class="search" width="80%">
     <tr>
 		<th><?php echo $spText['label']['Project']?>:</th>
 		<td>

@@ -1,66 +1,18 @@
 @CHARSET "UTF-8";
 
-.container {
+.chat-container {
     border: 2px solid #dedede;
-    background:   rgb(174, 214, 241);
+    background: rgb(211, 225, 236);
     border-radius: 5px;
     padding: 10px;
     margin: 10px 0;
-    width: 97%;
-  }
+}
 
-
-.container::after {
+.chat-container::after {
   content: "";
   clear: both;
   display: table;
 }
-
-body {
-  background: #e9e9e9;
-  color: #9a9a9a;
-  font: 100%/1.5em "Droid Sans", sans-serif;
-  margin: 0;
-}
-
-a { text-decoration: none; }
-
-fieldset {
-  border: 0;
-  margin: 0;
-  padding: 0;
-}
-
-h4, h5 {
-  line-height: 1.5em;
-  margin: 0;
-  color: rgb(12, 11, 11);
-}
-
-hr {
-  background: #e9e9e9;
-    border: 0;
-    -moz-box-sizing: content-box;
-    box-sizing: content-box;
-    height: 1px;
-    margin: 0;
-    min-height: 1px;
-}
-
-input {
-  border: 0;
-  color: inherit;
-    font-family: inherit;
-    font-size: 100%;
-    line-height: normal;
-    margin: 0;
-}
-
-p {
-    margin: 0;
-    color: rgb(23, 32, 42);
-  }
-  
   
 .clearfix { *zoom: 1; } 
 .clearfix:before, .clearfix:after {
@@ -137,20 +89,6 @@ p {
   width: 28px;
 }
 
-.chat-close {
-  background: #1b2126;
-  border-radius: 50%;
-  color: #fff;
-  display: block;
-  float: right;
-  font-size: 10px;
-  height: 16px;
-  line-height: 16px;
-  margin: 2px 0 0 0;
-  text-align: center;
-  width: 16px;
-}
-
 .chat {
   background: #fff; 
 }
@@ -167,22 +105,27 @@ p {
     border-radius: 5px;
     padding: 10px;
     margin: 10px 0;
-    width: 97%;
 }
-
 
 .chat-time {
+  font-size: 12px;
+  color: #6c757d;
   float: right;
-  font-size: 15px;
-  color: rgb(23, 32, 42);
 }
 
-h2 {margin-left: 55px;}
+.chat-name {
+	font-size: 12px;
+	float: right;
+}
+
+.chat-text { font-size: 14px;}
+.chat-desc {font-size: 16px;white-space: pre;}
+.chat-desc-small {font-size: 14px;white-space: pre;}
 
 textarea {
   margin-top: 20px;
   margin-left: 0px;
-  width: 97%;
+  width: 100%;
   height: 100px;
   -moz-border-bottom-colors: none;
   -moz-border-left-colors: none;
@@ -203,18 +146,7 @@ textarea {
   transition: background-color 0.2s ease 0s;
 }
 
-
 textarea:focus {
     background: none repeat scroll 0 0 #FFFFFF;
     outline-width: 0;
-}
-
-.input {
-  padding-left: 0px;
- border: 2px solid grey;
-  border-radius: 4px;
-}
-
-.input:focus {
-  border: 3px solid #555;
 }
