@@ -11,7 +11,7 @@ class SD_Manager extends SeoDiary {
 
 	function __construct() {
 		parent::__construct();
-		parent::initPlugin(true);
+		$this->setPluginTextsForRender ( $this->textCategory, $this->textTable );
 		$this->statusList = array(
 			'new' => $this->pluginText['New'],
 			'closed' => $this->pluginText['Closed'],
@@ -334,7 +334,7 @@ class SD_Manager extends SeoDiary {
 	/*
 	 * func to project shummary
 	 */
-	function showProjectSummery($info = '') {
+	function showProjectSummery($info = []) {
 		$this->set ( 'post', $info );
 		$userId = isLoggedIn ();
 		$projectCtrler = $this->createHelper ( 'Project' );

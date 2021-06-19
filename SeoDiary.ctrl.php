@@ -209,8 +209,8 @@ class SeoDiary extends SeoPluginsController {
 	 * function show system settings
 	 */
 	function projectSummery($data) {
-		$sdMgrCtrler = $this->createHelper ( 'SD_Manager' );
-		$sdMgrCtrler->showProjectSummery ( $data );
+		$sdMgrCtrler = $this->createHelper('SD_Manager');
+		$sdMgrCtrler->showProjectSummery( $data );
 	}
 
 		
