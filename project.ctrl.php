@@ -17,20 +17,18 @@ class Project extends SeoDiary {
 	/*
 	 * show projects list to manage
 	 */
-	function showProjectsManager($info = '') {
+	function showProjectsManager($info=[]) {
 		$userId = isLoggedIn();
 		$info ['user_id'] = intval( $info ['user_id'] );
 		$pgScriptPath = PLUGIN_SCRIPT_URL;
-		$sql = "select sdp.*, w.name as website_name from sd_projects sdp, websites w where sdp.website_id=w.id";
+		$sql = "select sdp.*, w.name as website_name 
+                from sd_projects sdp, websites w 
+                where sdp.website_id=w.id";
 		
 		if(isAdmin()) {
 			$userCtrler = new UserController();
 			$userList = $userCtrler->__getAllUsers();
 			$this->set( 'userList', $userList );
-			
-			$webSiteCtrler = new WebsiteController();
-			$websiteList = $webSiteCtrler->__getAllWebsites();
-			$this->set( 'websiteList', $websiteList );
 			
 			if(!empty( $info ['user_id'] )) {
 				$pgScriptPath .= "&user_id=" . $info ['user_id'];
@@ -81,7 +79,7 @@ class Project extends SeoDiary {
 		$errMsg ['description'] = formatErrorMsg( $this->validate->checkBlank( $listInfo ['description'] ) );
 		
 		if(! $this->validate->flagErr) {			
-			if(!$this->__checkProjectExists( $listInfo ['website_id'])) {
+		    if(!$this->__checkProjectExists($listInfo ['name'])) {
 				$sql = "insert into sd_projects(website_id, name,description,status)
 					values(" . intval( $listInfo ['website_id'] ) . ", '" . addslashes( $listInfo ['name'] ) . "','" 
 					. addslashes( $listInfo ['description'] ) . "',1)";
@@ -121,7 +119,6 @@ class Project extends SeoDiary {
 	 * func to update project
 	 */
 	function updateProject($listInfo) {
-
 		$this->set( 'post', $listInfo );
 		$errMsg ['website_id'] = formatErrorMsg( $this->validate->checkBlank( $listInfo ['website_id'] ) );
 		$errMsg ['name'] = formatErrorMsg( $this->validate->checkBlank( $listInfo ['name'] ) );
@@ -129,7 +126,7 @@ class Project extends SeoDiary {
 		
 		if(! $this->validate->flagErr) {			
 			
-			if($this->__checkProjectExists($listInfo['website_id'], $listInfo ['id'] )) {
+		    if($this->__checkProjectExists($listInfo ['name'], $listInfo ['id'] )) {
 				$this->validate->flagErr = true;
 				$errMsg ['name'] = formatErrorMsg( $this->spTextSA['projectalreadyexist'] );
 			}
@@ -173,10 +170,9 @@ class Project extends SeoDiary {
 	/*
 	 * function to check name of project already existing
 	 */
-	function __checkProjectExists($websiteId, $projectId = 0) {
-		$websiteId = intval( $websiteId );
+	function __checkProjectExists($projectName, $projectId = 0) {
 		$projectId = intval($projectId);
-		$sql = "select id from sd_projects where website_id=$websiteId";
+		$sql = "select id from sd_projects where name='".addslashes($projectName)."'";
 		$sql .= !empty( $projectId ) ? " and id!=$projectId" : "";
 		$listInfo = $this->db->select( $sql, true );
 		return !empty( $listInfo ['id'] ) ? $listInfo ['id'] : false;
@@ -184,7 +180,7 @@ class Project extends SeoDiary {
 
 	function __getAllProjects($userId = '', $isAdminCheck = false, $searchName = '') {
 		$sql = "select p.*,w.name as website_name from sd_projects p,websites w where p.website_id=w.id ";
-		if(!$isAdminCheck || !isAdmin() ){
+		if(!$isAdminCheck || !isAdmin() ) {
 			if(!empty($userId)) $sql .= " and user_id=" . intval($userId);
 		} 
 		
@@ -202,7 +198,9 @@ class Project extends SeoDiary {
 	 * func to get project info
 	 */
 	function __getProjectInfo($projectId) {
-		$sql = "select p.*,w.name as website_name from sd_projects p,websites w where p.website_id=w.id and p.id=" . intval( $projectId );
+		$sql = "select p.*,w.name as website_name 
+                from sd_projects p,websites w 
+                where p.website_id=w.id and p.id=" . intval( $projectId );
 		$info = $this->db->select( $sql, true );
 		return $info;
 	}

@@ -22,7 +22,7 @@ class SD_Manager extends SeoDiary {
 		);
 	}
 	
-	function showSDList($info = "") {
+	function showSDList($info=[]) {
 		$userId = isLoggedIn ();
 		$this->set ( 'post', $info );
 		$cond = "";
@@ -37,7 +37,7 @@ class SD_Manager extends SeoDiary {
 		        foreach ($projectList as $projectInfo) $prjIdList[] = $projectInfo['id'];
 		        $cond .= " and d.project_id in (".implode(',', $prjIdList).")";
 		    } else {
-		        $cond .= " and d.assigned_user_id=$userId";
+		        $cond .= " and (d.assigned_user_id=$userId or d.created_user_id=$userId)";
 		    }
 		}
 		
@@ -94,7 +94,7 @@ class SD_Manager extends SeoDiary {
 		$projectCtrler = $this->createHelper ( 'Project' );
 		$projectList = $projectCtrler->__getAllProjects ( $userId, true );
 		$this->set ( 'projectList', $projectList );
-		
+				
 		$categoryList = $this->selectDiaryCategory ();
 		$this->set ( 'categoryList', $categoryList );
 		$this->set( 'statusList', $this->statusList);

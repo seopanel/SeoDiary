@@ -1,6 +1,6 @@
 <?php echo showSectionHead($pluginText["Projects Manager"]); ?>
 <?php if(!empty($isAdmin)){ ?>
-	<table width="50%" class="search">
+	<table class="search">
 		<tr>
 			<th><?php echo $spText['common']['User']?>: </th>
 			<td>
@@ -49,7 +49,8 @@
 							$statLabel = $spText['common']["Activate"];
 						} 
 					?>
-					<select name="action" id="action<?php echo $listInfo['id']?>" onchange="doPluginAction('<?php echo PLUGIN_SCRIPT_URL?>', 'content', 'project_id=<?php echo $listInfo['id']?>&pageno=<?php echo $pageNo?>', 'action<?php echo $listInfo['id']?>')">
+					<select name="action" id="action<?php echo $listInfo['id']?>" 
+						onchange="doSDPluginAction('<?php echo PLUGIN_SCRIPT_URL?>', 'content', 'project_id=<?php echo $listInfo['id']?>&pageno=<?php echo $pageNo?>', 'action<?php echo $listInfo['id']?>')">
 						<option value="select">-- <?php echo $spText['common']['Select']?> --</option>
 						<option value="<?php echo $statAction?>"><?php echo $statLabel?></option>
                         <option value="editProject"><?php echo $spText['common']['Edit']?></option>
@@ -69,7 +70,7 @@
 	?>
 </table>
 <br>
-<table width="100%" class="actionSec">
+<table class="actionSec">
 	<tr>
     	<td>
          	<a onclick="<?php echo pluginGETMethod('action=newProject&user_id='.$userId, 'content')?>" href="javascript:void(0);" class="actionbut">

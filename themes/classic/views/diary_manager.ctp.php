@@ -1,6 +1,6 @@
 <?php echo showSectionHead($pluginText["Diary Manager"]); ?>
 <form id="searchform">
-<table class="search" width="100%">
+<table class="search">
     <tr>
 		<th><?php echo $spText['label']['Project']?>:</th>
 		<td>
@@ -28,7 +28,6 @@
 				<?php }?>
 			</select>
 		</td>
-
 		<th><?php echo $pluginText['Assignee']?>:</th>
 		<td>
 			<select name="assigned_user_id">
@@ -41,7 +40,7 @@
 					<?php }?>						
 				<?php }?>
 			</select>
-		</td>
+		</td>		
 	</tr>
 	<tr>
 		<th><?php echo $spText['common']['Keywords']?>:</th>
@@ -107,8 +106,8 @@
                 <td><?php echo $listInfo['due_date']?></td>
                 <td><?php echo $userIdList[$listInfo['assigned_user_id']]['username']?></td>
 				<td><?php echo $statusList[$listInfo['status']]?></td>
-				<td width="100px">
-					<select name="action" id="action<?php echo $listInfo['id']?>" onchange="doPluginAction('<?php echo PLUGIN_SCRIPT_URL?>', 'content', 'diary_id=<?php echo $listInfo['id']?>&pageno=<?php echo $pageNo?>', 'action<?php echo $listInfo['id']?>')">
+				<td>
+					<select name="action" id="action<?php echo $listInfo['id']?>" onchange="doSDPluginAction('<?php echo PLUGIN_SCRIPT_URL?>', 'content', 'diary_id=<?php echo $listInfo['id']?>&pageno=<?php echo $pageNo?>', 'action<?php echo $listInfo['id']?>')">
 						<option value="">-- <?php echo $spText['common']['Select']?> --</option>
 						<option value="newComment"><?php echo $spText['label']['Comments']?></option>
 						<option value="editDiary"><?php echo $spText['common']['Edit']?></option>
@@ -125,10 +124,9 @@
 	} 
 	?>
 </table>
-<br>
-<table width="100%" class="actionSec">
+<table class="actionSec">
 	<tr>
-    	<td style="padding-top: 6px;">
+    	<td>
          	<a onclick="<?php echo pluginGETMethod('action=newDiary&project_id='.$projectId, 'content')?>" href="javascript:void(0);" class="actionbut">
          		<?php echo $pluginText['New Diary']?>
          	</a>

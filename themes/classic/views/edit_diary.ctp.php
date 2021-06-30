@@ -36,11 +36,11 @@
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $spText['label']['Title']?>:</td>
-		<td><input type="text" name="title" value="<?php echo $post['title']?>"><?php echo $errMsg['title']?></td>
+		<td><input class="form-control" type="text" name="title" value="<?php echo $post['title']?>"><?php echo $errMsg['title']?></td>
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $spText['label']['Description']?>:</td>
-		<td><textarea name="description"><?php echo $post['description']?></textarea><br><?php echo $errMsg['description']?></td>
+		<td><textarea class="form-control" name="description"><?php echo $post['description']?></textarea><br><?php echo $errMsg['description']?></td>
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $pluginText['Assignee']?>:</td>
@@ -59,7 +59,14 @@
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $pluginText['Due Date']?>:</td>
-		<td><input type="date" name="due_date" value="<?php echo $post['due_date']?>"><?php echo $errMsg['due_date']?></td>
+		<td>
+			<input type="text" name="due_date" value="<?php echo $post['due_date']?>"><?php echo $errMsg['due_date']?>
+    		<script type="text/javascript">
+    		$(function() {
+    			$( "input[name='due_date']").datepicker({dateFormat: "yy-mm-dd"});
+    		});
+    		</script>
+		</td>
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $spText['common']['Status']?>:</td>
@@ -81,7 +88,7 @@
 	</tr>
 </table>
 <br>
-<table width="100%" class="actionSec">
+<table class="actionSec">
 	<tr>
     	<td style="padding-top: 6px;text-align:right;">
     		<a onclick="<?php echo pluginGETMethod('action=diaryManager', 'content')?>" href="javascript:void(0);" class="actionbut">

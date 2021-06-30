@@ -79,7 +79,8 @@
                 <td><?php echo $listInfo['due_date']?></td>
 				<td><?php echo $statusList[$listInfo['status']]?></td>
 				<td width="100px">
-					<select name="action" id="action<?php echo $listInfo['id']?>" onchange="doPluginAction('<?php echo PLUGIN_SCRIPT_URL?>', 'content', 'project_id=<?php echo $listInfo['id']?>&pageno=<?php echo $pageNo?>', 'action<?php echo $listInfo['id']?>')">
+					<select name="action" id="action<?php echo $listInfo['id']?>" 
+						onchange="doSDPluginAction('<?php echo PLUGIN_SCRIPT_URL?>', 'content', 'project_id=<?php echo $listInfo['id']?>&pageno=<?php echo $pageNo?>', 'action<?php echo $listInfo['id']?>')">
 						<option value="">-- <?php echo $spText['common']['Select']?> --</option>
 						<option value="newComment"><?php echo $spText['label']['Comments']?></option>
 						<option value="editDiary"><?php echo $spText['common']['Edit']?></option>

@@ -22,21 +22,20 @@
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $spText['common']['Name']?>:</td>
-		<td><input type="text" name="name" value="<?php echo $post['name']?>"><?php echo $errMsg['name']?></td>
+		<td><input type="text" name="name" class="form-control" value="<?php echo $post['name']?>"><?php echo $errMsg['name']?></td>
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $spText['label']['Description']?>:</td>
 		<td>
-			<textarea name="description"><?php echo $post['description']?></textarea>
-			<br>
+			<textarea name="description" class="form-control"><?php echo $post['description']?></textarea>
 			<?php echo $errMsg['description']?>
 		</td>
 	</tr>
 </table>
 <br>
-<table width="100%" class="actionSec">
+<table class="actionSec">
 	<tr>
-    	<td style="padding-top: 6px;text-align:right;">
+    	<td>
     		<a onclick="<?php echo pluginGETMethod('', 'content')?>" href="javascript:void(0);" class="actionbut">
          		<?php echo $spText['button']['Cancel']?>
          	</a>&nbsp;

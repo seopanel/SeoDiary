@@ -1,4 +1,4 @@
-function doPluginAction(scriptUrl, scriptPos, scriptArgs, actionDiv) {
+function doSDPluginAction(scriptUrl, scriptPos, scriptArgs, actionDiv) {
 	actVal = document.getElementById(actionDiv).value;
 	scriptArgs += "&action=" + actVal; 
 	switch (actVal) {
@@ -28,7 +28,6 @@ function doPluginAction(scriptUrl, scriptPos, scriptArgs, actionDiv) {
 }
 
 function doDiaryAction(scriptUrl, scriptPos, scriptArgs, actionDiv, actionArg) {
-
 	actVal = document.getElementById(actionDiv).value;
 	scriptArgs += "&"+ actionArg+ "=" + actVal; 	
 	scriptDoLoad(scriptUrl, scriptPos, scriptArgs);

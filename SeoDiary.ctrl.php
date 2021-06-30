@@ -137,7 +137,6 @@ class SeoDiary extends SeoPluginsController {
 		$sdMgrCtrler = $this->createHelper ( 'SD_Manager' );
 		$sdMgrCtrler->newDiary ( $data );
 	}
-
 	
 	/*
 	 * func to create new project
@@ -212,7 +211,6 @@ class SeoDiary extends SeoPluginsController {
 		$sdMgrCtrler = $this->createHelper('SD_Manager');
 		$sdMgrCtrler->showProjectSummery( $data );
 	}
-
 		
 	/*
 	 * function for start sending status to social media networks like fb, twitter, linkedin using cron

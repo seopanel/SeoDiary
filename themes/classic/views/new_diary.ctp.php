@@ -35,11 +35,11 @@
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $spText['label']['Title']?>:</td>
-		<td><input type="text" name="title" value="<?php echo $post['title']?>"><?php echo $errMsg['title']?></td>
+		<td><input type="text" name="title" value="<?php echo $post['title']?>" class="form-control"><?php echo $errMsg['title']?></td>
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $spText['label']['Description']?>:</td>
-		<td><textarea name="description"><?php echo $post['description']?></textarea><br><?php echo $errMsg['description']?></td>
+		<td><textarea name="description" class="form-control"><?php echo $post['description']?></textarea><br><?php echo $errMsg['description']?></td>
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $pluginText['Assignee']?>:</td>
@@ -58,7 +58,15 @@
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $pluginText['Due Date']?>:</td>
-		<td><input type="date" name="due_date" value="<?php echo $post['due_date']?>"><?php echo $errMsg['due_date']?></td>
+		<td>
+			<?php $dueDate = !empty($post['due_date']) ? $post['due_date'] : date('Y-m-d', strtotime('+5 days')); ?>
+			<input type="text" name="due_date" value="<?php echo $dueDate ?>"><?php echo $errMsg['due_date']?>
+    		<script type="text/javascript">
+    		$(function() {
+    			$( "input[name='due_date']").datepicker({dateFormat: "yy-mm-dd"});
+    		});
+    		</script>
+		</td>
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $spText['common']['Status']?>:</td>
@@ -76,13 +84,13 @@
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $spTextReport['Email notification']?>:</td>
-		<td><input type="checkbox" name="email_notification" value="1" <?php echo !empty($post['email_notification']) ? "checked='checked'" : ""?>"></td>
+		<td><input type="checkbox" name="email_notification" value="1" <?php echo !empty($post['email_notification']) ? "checked='checked'" : ""?> ></td>
 	</tr>
 </table>
 <br>
-<table width="100%" class="actionSec">
+<table class="actionSec">
 	<tr>
-    	<td style="padding-top: 6px;text-align:right;">
+    	<td>
     		<a onclick="<?php echo pluginGETMethod('action=diaryManager', 'content')?>" href="javascript:void(0);" class="actionbut">
          		<?php echo $spText['button']['Cancel']?>
          	</a>&nbsp;
