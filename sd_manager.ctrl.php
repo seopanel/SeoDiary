@@ -85,7 +85,7 @@ class SD_Manager extends SeoDiary {
 	/*
 	 * func to create new project
 	 */
-	function newDiary($info = '') {
+	function newDiary($info = []) {
 		$userId = isLoggedIn ();
 		$userCtrler = new UserController ();
 		$userList = $userCtrler->__getAllUsers ();
@@ -277,7 +277,7 @@ class SD_Manager extends SeoDiary {
 	/*
 	 * func to create new comments
 	 */
-	function newDiaryComments($info = '') {
+	function newDiaryComments($info = []) {
 		$this->set ( 'post', $info );
 		$userId = isLoggedIn();
 		
@@ -367,7 +367,7 @@ class SD_Manager extends SeoDiary {
 	/*
 	 * show tasks assigned users
 	 */
-	function showTaskList($info = "") {
+	function showTaskList($info = []) {
 		$this->set ( 'post', $info );
 		$userId = isLoggedIn ();
 		$cond .= " and d.assigned_user_id=$userId";

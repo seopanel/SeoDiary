@@ -60,7 +60,7 @@ class Project extends SeoDiary {
 	/*
 	 * func to create new project
 	 */
-	function newProject($info = '') {
+	function newProject($info = []) {
 		$userId = isLoggedIn();
 		$webSiteCtrler = new WebsiteController();
 		$websiteList = $webSiteCtrler->__getAllWebsites( $userId, true );
