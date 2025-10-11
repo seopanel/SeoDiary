@@ -1,14 +1,15 @@
 <?php echo showSectionHead($spTextSA['Project Summary']); ?>
 <form id="projectform">	
 	<div id="live-chat">
-		<header class="clearfix"><?php echo $spText['label']['Project']?>:</td>
-			<select onchange="doDiaryAction('<?php echo PLUGIN_SCRIPT_URL?>', 'content', 'action=projectSummery', 'project_id','project_id')" name="project_id" id="project_id">
+		<header class="clearfix d-flex align-items-center">
+			<span style="margin-right: 10px;"><?php echo $spText['label']['Project']?>:</span>
+			<select onchange="doDiaryAction('<?php echo PLUGIN_SCRIPT_URL?>', 'content', 'action=projectSummery', 'project_id','project_id')" name="project_id" id="project_id" class="custom-select" style="flex: 0 0 auto; width: auto;">
 					<?php foreach($projectList as $prjInfo){?>
 						<?php if($prjInfo['id'] == $post['project_id']){?>
 							<option value="<?php echo $prjInfo['id']?>" selected><?php echo $prjInfo['name']?></option>
 						<?php }else{?>
 							<option value="<?php echo $prjInfo['id']?>"><?php echo $prjInfo['name']?></option>
-						<?php }?>						
+						<?php }?>
 					<?php }?>
 			</select>
 		</header>
@@ -33,7 +34,7 @@
         					  	<p class='chat-desc-small'><?php echo $listInfo['description']?></p>
         					  	<span class="chat-name">
             					  	<a onclick="<?php echo pluginGETMethod('action=newComment&diary_id='.$listInfo['id'], 'content')?>" href="javascript:void(0);">
-        								<span class="time-right"><br><?php echo $listInfo['comment_count']?> <?php echo 'comments'?></span>
+        								<span class="time-right" style="font-size: 16px;"><br><?php echo $listInfo['comment_count']?> <?php echo 'comments'?></span>
             					  	</a>
             					</span>
         					</div>

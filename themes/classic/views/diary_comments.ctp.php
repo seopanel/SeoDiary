@@ -1,14 +1,15 @@
 <?php echo showSectionHead($pluginText["Diary Comments"]); ?>
 <form id="projectform">
 	<div id="live-chat">
-		<header class="clearfix"><?php echo $spText['common']['Name']?>:
-			<select onchange="doDiaryAction('<?php echo PLUGIN_SCRIPT_URL?>', 'content', 'action=newComment', 'diary_id','diary_id')" name="diary_id" id="diary_id">
+		<header class="clearfix d-flex align-items-center">
+			<span style="margin-right: 10px;"><?php echo $spText['common']['Name']?>:</span>
+			<select onchange="doDiaryAction('<?php echo PLUGIN_SCRIPT_URL?>', 'content', 'action=newComment', 'diary_id','diary_id')" name="diary_id" id="diary_id" class="custom-select" style="flex: 0 0 auto; width: auto;">
 					<?php foreach($diaryList as $drInfo){?>
 						<?php if($drInfo['id'] == $diaryId){?>
 							<option value="<?php echo $drInfo['id']?>" selected><?php echo $drInfo['title']?></option>
 						<?php }else{?>
 							<option value="<?php echo $drInfo['id']?>"><?php echo $drInfo['title']?></option>
-						<?php }?>						
+						<?php }?>
 					<?php }?>
 			</select>
 		</header>
@@ -42,19 +43,19 @@
         	</div>
     	<?php }?>
 		
-		<textarea name="comments" class="ui-autocomplete-input" aria-autocomplete="list" aria-haspopup="true" placeholder="<?php echo $pluginText['Add your comment here']?>..."><?php echo $post['comments']?></textarea>
+		<textarea name="comments" class="form-control" aria-autocomplete="list" aria-haspopup="true" placeholder="<?php echo $pluginText['Add your comment here']?>..."><?php echo $post['comments']?></textarea>
 	    <?php echo $errMsg['comments']?>
-	    
-	    <table width="100%" class="actionSec">
+
+	    <table class="actionSec float-right mt-2">
         	<tr>
-            	<td style="padding-top: 6px;text-align:right;">
+            	<td>
                  	<?php $actFun1 = SP_DEMO ? "alertDemoMsg()" : pluginPOSTMethod('projectform', 'content', 'action=newComment'); ?>
-            		<a onclick="<?php echo $actFun1?>" href="javascript:void(0);" class="actionbut">
+            		<a onclick="<?php echo $actFun1?>" href="javascript:void(0);" class="btn btn-warning">
                  		<?php echo $spText['button']['Cancel']?>
                  	</a>&nbsp;
-        
+
                  	<?php $actFun = SP_DEMO ? "alertDemoMsg()" : pluginPOSTMethod('projectform', 'content', 'action=createComment'); ?>
-                 	<a onclick="<?php echo $actFun?>" href="javascript:void(0);" class="actionbut">
+                 	<a onclick="<?php echo $actFun?>" href="javascript:void(0);" class="btn btn-primary">
                  		<?php echo $pluginText['Add Comment']?>
                  	</a>
             	</td>

@@ -8,13 +8,13 @@
 	<tr class="form_data">
 		<td><?php echo $spText['common']['Website']?>:</td>
 		<td>
-			<select name="website_id">
+			<select name="website_id" class="custom-select">
 				<?php foreach($websiteList as $websiteInfo){?>
 					<?php if($websiteInfo['id'] == $post['website_id']){?>
 						<option value="<?php echo $websiteInfo['id']?>" selected><?php echo $websiteInfo['name']?></option>
 					<?php }else{?>
 						<option value="<?php echo $websiteInfo['id']?>"><?php echo $websiteInfo['name']?></option>
-					<?php }?>						
+					<?php }?>
 				<?php }?>
 			</select>
 			<?php echo $errMsg['website_id']?>
@@ -32,15 +32,14 @@
 		</td>
 	</tr>
 </table>
-<br>
-<table class="actionSec">
+<table class="actionSec float-right mt-2">
 	<tr>
     	<td>
-    		<a onclick="<?php echo pluginGETMethod('', 'content')?>" href="javascript:void(0);" class="actionbut">
+    		<a onclick="<?php echo pluginGETMethod('', 'content')?>" href="javascript:void(0);" class="btn btn-warning">
          		<?php echo $spText['button']['Cancel']?>
          	</a>&nbsp;
          	<?php $actFun = SP_DEMO ? "alertDemoMsg()" : pluginPOSTMethod('projectform', 'content', 'action=createProject'); ?>
-         	<a onclick="<?php echo $actFun?>" href="javascript:void(0);" class="actionbut">
+         	<a onclick="<?php echo $actFun?>" href="javascript:void(0);" class="btn btn-primary">
          		<?php echo $spText['button']['Proceed']?>
          	</a>
     	</td>
