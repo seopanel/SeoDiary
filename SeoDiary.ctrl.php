@@ -219,5 +219,12 @@ class SeoDiary extends SeoPluginsController {
 		$reportCtrler = $this->createHelper ( 'SD_Manager' );
 		$reportCtrler->startCronJob( $data );
 	}
+
+	/*
+	 * function to show about us page
+	 */
+	function aboutus($data) {
+		$this->pluginRender('aboutus');
+	}
 }
 ?>
