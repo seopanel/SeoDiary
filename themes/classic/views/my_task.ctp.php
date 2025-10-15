@@ -62,7 +62,6 @@
 
 <table id="cust_tab">
 	<tr>
-		<th><?php echo $spText['common']['Id']?></th>
 		<th><?php echo $spText['label']['Title']?></th>
 		<th><?php echo $spText['label']['Project']?></th>
 		<th><?php echo $spText['common']['Category']?></th>
@@ -76,8 +75,7 @@
 			$diaryLink = scriptAJAXLinkHref(PLUGIN_SCRIPT_URL, 'content', "action=editDiary&project_id={$listInfo['id']}", "{$listInfo['title']}");
 			?>
 			<tr>
-				<td width="40px"><?php echo $listInfo['id']?></td>
-				<td><?php echo $diaryLink?></td>				
+				<td><?php echo $diaryLink?></td>
 				<td><?php echo $listInfo['project_name']?></td>
 				<td><?php echo $listInfo['category_label']?></td>
                 <td><?php echo $listInfo['due_date']?></td>
@@ -96,7 +94,7 @@
 		}
 	}else{
 		?>
-		<tr><td colspan="7"><b><?php echo $_SESSION['text']['common']['No Records Found']?></b></tr>
+		<tr><td colspan="6"><b><?php echo $_SESSION['text']['common']['No Records Found']?></b></tr>
 		<?php
 	} 
 	?>
