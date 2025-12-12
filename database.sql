@@ -186,7 +186,7 @@ ALTER TABLE `sd_seo_diary`
 ALTER TABLE `sd_projects` ADD CONSTRAINT `sd_project_website_id_delete` FOREIGN KEY ( `website_id` ) REFERENCES `websites` 
 (`id`) ON DELETE CASCADE ON UPDATE NO ACTION ;
 
-INSERT INTO `texts` ( `category`, `label`, `content`) VALUES
+INSERT IGNORE INTO `texts` ( `category`, `label`, `content`) VALUES
 ('seodiary', 'Add your comment here', 'Add your comment here'),
 ('seodiary', 'Diary already exist', 'Diary already exist'),
 ('seodiary', 'Edit Diary', 'Edit Diary'),
