@@ -18,3 +18,10 @@ INSERT IGNORE INTO `texts` ( `category`, `label`, `content`) VALUES
 ('seodiary', 'Task Due Tomorrow', 'Task Due Tomorrow'),
 ('seodiary', 'Project', 'Project');
 
+--
+-- version 1.5.0 changes: rename "About Us" menu link to "Features & Support"
+--
+
+INSERT IGNORE INTO `texts` ( `category`, `label`, `content`) VALUES
+('seodiary', 'Features & Support', 'Features & Support');
+

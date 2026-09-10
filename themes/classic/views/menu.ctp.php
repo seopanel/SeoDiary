@@ -18,5 +18,5 @@ $spTextSA = $pluginCtrler->getLanguageTexts('siteauditor', $_SESSION['lang_code'
         <li><a href="javascript:void(0);" onclick="<?php echo pluginMenu('action=settings'); ?>"><?php echo $spTextPanel['Settings']?></a></li>
     <?php } ?>
         	
-	<li><a href="javascript:void(0);" onclick="<?php echo  pluginMenu('action=aboutus'); ?>"><?php echo  $spTextPanel['About Us']?></a></li>    
+	<li><a href="javascript:void(0);" onclick="<?php echo  pluginMenu('action=aboutus'); ?>"><?php echo  $pluginText['Features & Support']?></a></li>
 </ul>

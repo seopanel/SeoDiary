@@ -189,6 +189,7 @@ ALTER TABLE `sd_projects` ADD CONSTRAINT `sd_project_website_id_delete` FOREIGN 
 (`id`) ON DELETE CASCADE ON UPDATE NO ACTION ;
 
 INSERT IGNORE INTO `texts` ( `category`, `label`, `content`) VALUES
+('seodiary', 'Features & Support', 'Features & Support'),
 ('seodiary', 'Add your comment here', 'Add your comment here'),
 ('seodiary', 'Diary already exist', 'Diary already exist'),
 ('seodiary', 'Edit Diary', 'Edit Diary'),
