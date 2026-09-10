@@ -213,11 +213,12 @@ class SeoDiary extends SeoPluginsController {
 	}
 		
 	/*
-	 * function for start sending status to social media networks like fb, twitter, linkedin using cron
+	 * function to send due-date reminder emails for open diary entries -
+	 * see diarycron.php and SD_Manager::startCronJob()
 	 */
 	function cronjob() {
 		$reportCtrler = $this->createHelper ( 'SD_Manager' );
-		$reportCtrler->startCronJob( $data );
+		$reportCtrler->startCronJob();
 	}
 
 	/*

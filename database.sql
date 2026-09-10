@@ -67,7 +67,8 @@ CREATE TABLE `sd_seo_diary` (
   `update_time` datetime NOT NULL,
   `due_date` date NOT NULL,
   `status` enum('new','closed','cancelled','inprogress','blocked','feedback') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'new',
-  `email_notification` tinyint(1) NOT NULL DEFAULT '0'
+  `email_notification` tinyint(1) NOT NULL DEFAULT '0',
+  `last_reminder_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -90,7 +91,8 @@ CREATE TABLE `sd_settings` (
 --
 
 INSERT INTO `sd_settings` (`id`, `set_label`, `set_name`, `set_val`, `set_type`, `display`) VALUES
-(1, 'Allow user to access project manager', 'SD_ALLOW_USER_PROJECTS', '0', 'bool', 1);
+(1, 'Allow user to access project manager', 'SD_ALLOW_USER_PROJECTS', '0', 'bool', 1),
+(2, 'Send due-date reminder emails', 'SD_ENABLE_DUE_REMINDERS', '1', 'bool', 1);
 
 --
 -- Indexes for dumped tables
@@ -209,4 +211,9 @@ INSERT IGNORE INTO `texts` ( `category`, `label`, `content`) VALUES
 ('seodiary', 'Assignee', 'Assignee'),
 ('seodiary', 'Sorting', 'Sorting'),
 ('seodiary', 'New Diary', 'New Diary'),
-('seodiary', 'Add Comment', 'Add Comment');
+('seodiary', 'Add Comment', 'Add Comment'),
+('seodiary', 'SD_ENABLE_DUE_REMINDERS', 'Send due-date reminder emails'),
+('seodiary', 'Task Overdue', 'Task Overdue'),
+('seodiary', 'Task Due Today', 'Task Due Today'),
+('seodiary', 'Task Due Tomorrow', 'Task Due Tomorrow'),
+('seodiary', 'Project', 'Project');

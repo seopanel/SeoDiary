@@ -87,6 +87,11 @@ class SD_Manager extends SeoDiary {
 	 */
 	function newDiary($info = []) {
 		$userId = isLoggedIn ();
+		// also restores the user's own entries on a validation-failure
+		// retry (createDiary() re-calls this with $listInfo), and lets an
+		// external deep link (e.g. "Add to SEO Diary" from the AI
+		// Visibility recommendations dashboard) prefill title/description
+		$this->set ( 'post', $info );
 		$userCtrler = new UserController ();
 		$userList = $userCtrler->__getAllUsers ();
 		$this->set ( 'userList', $userList );
@@ -469,53 +474,86 @@ class SD_Manager extends SeoDiary {
 	    return $diaryList;
 	}
 
-	/*function startCronJob() {
+	/*
+	 * func to send due-date reminder emails for open (not closed/
+	 * cancelled) diary entries that are overdue, due today, or due
+	 * tomorrow. Sends at most once per calendar day per diary entry
+	 * (tracked via last_reminder_date), so this is safe to invoke
+	 * repeatedly from a frequent system cron (see diarycron.php) without
+	 * spamming the assignee. Entries with no assignee are skipped - there
+	 * is nobody to remind.
+	 */
+	function startCronJob() {
 		$this->cronJob = true;
-		$sql = "SELECT `id`,`assigned_user_id`, `due_date`, `status` FROM `sd_seo_diary` WHERE `status`= 'new' or `sd_seo_diary`.`status`='inprogress'";
-		$diaryList = $this->db->select($sql);
 
-		if (count($diaryList) > 0) {
-			foreach ($diaryList as $diaryListInfo) {
-				$diaryId =$diaryListInfo['id'];
-				$this->generateDairyList($diaryId);
-				
-			}
-		} else {
-			echo "Diary List generated for all the projects!";
+		if (!defined('SD_ENABLE_DUE_REMINDERS') || !SD_ENABLE_DUE_REMINDERS) {
+			echo "Due-date reminders are disabled (SD_ENABLE_DUE_REMINDERS).";
+			return;
 		}
 
+		$today = date('Y-m-d');
+		$tomorrow = date('Y-m-d', strtotime('+1 day'));
+
+		$sql = "SELECT * FROM sd_seo_diary
+				WHERE status NOT IN ('closed','cancelled')
+				AND assigned_user_id > 0
+				AND due_date <= '" . addslashes($tomorrow) . "'
+				AND (last_reminder_date IS NULL OR last_reminder_date != '" . addslashes($today) . "')";
+		$diaryList = $this->db->select($sql);
+
+		if (empty($diaryList)) {
+			echo "No due-date reminders to send.";
+			return;
+		}
+
+		$sentCount = 0;
+		foreach ($diaryList as $diaryInfo) {
+			if ($this->sendDueDateReminderMail($diaryInfo, $today)) {
+				$sentCount++;
+			}
+			$this->db->query("UPDATE sd_seo_diary SET last_reminder_date='" . addslashes($today) . "' WHERE id=" . intval($diaryInfo['id']));
+		}
+
+		echo "$sentCount of " . count($diaryList) . " due-date reminder(s) sent.";
 	}
 
-	function generateDairyList($diaryId) {	
+	/*
+	 * func to send a single due-date reminder mail, worded as overdue/
+	 * due-today/due-tomorrow depending on the diary entry's due_date
+	 * relative to $today. Returns sendMail()'s result (falsy on failure -
+	 * e.g. the assignee has no email, or sendMail() itself fails), same
+	 * shape as sendNotificationMail().
+	 */
+	function sendDueDateReminderMail($diaryInfo, $today) {
+		if ($diaryInfo['due_date'] < $today) {
+			$reminderLabel = $this->pluginText['Task Overdue'];
+		} else if ($diaryInfo['due_date'] == $today) {
+			$reminderLabel = $this->pluginText['Task Due Today'];
+		} else {
+			$reminderLabel = $this->pluginText['Task Due Tomorrow'];
+		}
 
-		$datetime = new DateTime(date('Y-m-d'));
-		$datetime->modify('+1 day');
-		$datetime->format('Y-m-d');
-		$diaryInfo = $this->__getDiaryInfo($diaryId);
+		$userController = new UserController();
+		$userInfo = $userController->__getUserInfo($diaryInfo['assigned_user_id']);
 
+		if (empty($userInfo['email'])) {
+			return false;
+		}
 
-            if (($diaryInfo['status'] == "new" || "inprogress") || ($diaryInfo['due_date'] > $datetime)) {
-                	$userId = $diaryInfo ['assigned_user_id'];
-                    $subject = "your assingned diary was changed";
-                    $content = $this->getViewContent('mailview', 'ajax', false);
-                    $userController = new UserController ();
-                    $userInfo = $userController->__getUserInfo ( $userId );
-                    $adminInfo = $userController->__getAdminInfo ();
-                    $userName = $userInfo ['first_name'] . "-" . $userInfo ['last_name'];
-                    $this->set ( 'userName', $userName );
-                    
-            	if (! sendMail ( $adminInfo ['email'], $userName, $userInfo ['email'], $subject, $content )) {
-                echo "Reports send successfully to " . $userInfo ['email'] . "\n";
-             	} else {
-                        echo 'An internal error occured while sending mail!';
-                       }
-             ?><br><?php print $adminInfo ['email']; 
-			             print  $userName;
-			             print  $userInfo ['email'];
-			             print  $subject;
-			             print  $content;
-         }
-		}*/
-		
+		$subject = $reminderLabel . ": " . $diaryInfo['title'];
+		$userName = $userInfo['first_name'] . " " . $userInfo['last_name'];
+		$adminInfo = $userController->__getAdminInfo();
+		$adminName = $adminInfo['first_name'] . " " . $adminInfo['last_name'];
+		$projectInfo = $this->__getDiaryInfo($diaryInfo['id']);
+
+		$this->set('userName', $userName);
+		$this->set('listInfo', $diaryInfo);
+		$this->set('reminderLabel', $reminderLabel);
+		$this->set('projectName', $projectInfo['project_name']);
+		$content = $this->getPluginViewContent('diary_reminder_mail');
+
+		return sendMail($adminInfo['email'], $adminName, $userInfo['email'], $subject, $content);
+	}
+
 }
 	    
