@@ -1,6 +1,6 @@
 <?php echo showSectionHead($pluginText['Edit Diary']); ?>
 <form id="projectform">
-<input type="hidden" name="id" value="<?php echo $post['id']?>"/>
+<input type="hidden" name="id" value="<?php echo htmlspecialchars($post['id'] ?? '')?>"/>
 <table id="cust_tab">
 	<tr class="form_head">
 		<th width='30%'><?php echo $pluginText['Edit Diary']?></th>
@@ -36,11 +36,11 @@
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $spText['label']['Title']?>:</td>
-		<td><input class="form-control" type="text" name="title" value="<?php echo $post['title']?>"><?php echo $errMsg['title']?></td>
+		<td><input class="form-control" type="text" name="title" value="<?php echo htmlspecialchars($post['title'] ?? '')?>"><?php echo $errMsg['title']?></td>
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $spText['label']['Description']?>:</td>
-		<td><textarea class="form-control" name="description"><?php echo $post['description']?></textarea><br><?php echo $errMsg['description']?></td>
+		<td><textarea class="form-control" name="description"><?php echo htmlspecialchars($post['description'] ?? '')?></textarea><br><?php echo $errMsg['description']?></td>
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $pluginText['Assignee']?>:</td>
@@ -60,7 +60,7 @@
 	<tr class="form_data">
 		<td><?php echo $pluginText['Due Date']?>:</td>
 		<td>
-			<input type="text" name="due_date" value="<?php echo $post['due_date']?>" class="form-control"><?php echo $errMsg['due_date']?>
+			<input type="text" name="due_date" value="<?php echo htmlspecialchars($post['due_date'] ?? '')?>" class="form-control"><?php echo $errMsg['due_date']?>
     		<script type="text/javascript">
     		$(function() {
     			$( "input[name='due_date']").datepicker({dateFormat: "yy-mm-dd"});

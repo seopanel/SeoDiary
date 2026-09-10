@@ -16,7 +16,7 @@
 			</select>
 		</td>
 		<th class="pl-4"><?php echo $spText['common']['Keywords']?>:</th>
-		<td><input type="text" class="form-control" name="keyword" value="<?php echo $post['keyword']?>"><?php echo $errMsg['keyword']?></td>
+		<td><input type="text" class="form-control" name="keyword" value="<?php echo htmlspecialchars($post['keyword'] ?? '')?>"><?php echo $errMsg['keyword']?></td>
 	</tr>
 	<tr>
 		<th><?php  echo $spText['common']['Status']?>:</th>
@@ -72,11 +72,14 @@
 	<?php
 	if(count($list) > 0) {
 		foreach($list as $i => $listInfo){
-			$diaryLink = scriptAJAXLinkHref(PLUGIN_SCRIPT_URL, 'content', "action=editDiary&project_id={$listInfo['id']}", "{$listInfo['title']}");
+			// see diary_manager.ctp.php's matching fix for why title is
+			// escaped here despite scriptAJAXLinkHref() itself not
+			// escaping $linkText
+			$diaryLink = scriptAJAXLinkHref(PLUGIN_SCRIPT_URL, 'content', "action=editDiary&project_id={$listInfo['id']}", htmlspecialchars($listInfo['title']));
 			?>
 			<tr>
 				<td><?php echo $diaryLink?></td>
-				<td><?php echo $listInfo['project_name']?></td>
+				<td><?php echo htmlspecialchars($listInfo['project_name'])?></td>
 				<td><?php echo $listInfo['category_label']?></td>
                 <td><?php echo $listInfo['due_date']?></td>
 				<td><?php echo $statusList[$listInfo['status']]?></td>

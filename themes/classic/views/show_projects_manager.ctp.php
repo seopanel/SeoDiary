@@ -36,11 +36,16 @@
 	<?php
 	if(count($list) > 0) {
 		foreach($list as $i => $listInfo){
-			$projectLink = scriptAJAXLinkHref(PLUGIN_SCRIPT_URL, 'content', "action=editProject&project_id={$listInfo['id']}", "{$listInfo['name']}");
+			// see SeoDiary's diary_manager.ctp.php for why name/website
+			// name are escaped here despite scriptAJAXLinkHref() itself
+			// not escaping $linkText - project name is real user-supplied
+			// content (createProject()/updateProject() only addslashes()
+			// it, never strip/escape)
+			$projectLink = scriptAJAXLinkHref(PLUGIN_SCRIPT_URL, 'content', "action=editProject&project_id={$listInfo['id']}", htmlspecialchars($listInfo['name']));
 			?>
 			<tr>
 				<td><?php echo $projectLink?></td>
-				<td><?php echo $listInfo['website_name']?></td>
+				<td><?php echo htmlspecialchars($listInfo['website_name'])?></td>
 				<td class="text-center"><?php echo showStatusBadge($listInfo['status']); ?></td>
 				<td>
 					<?php

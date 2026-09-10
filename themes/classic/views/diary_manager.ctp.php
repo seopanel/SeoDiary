@@ -44,7 +44,7 @@
 	</tr>
 	<tr>
 		<th><?php echo $spText['common']['Keywords']?>:</th>
-		<td><input type="text" class="form-control" name="keyword" value="<?php echo $post['keyword']?>"><?php echo $errMsg['keyword']?></td>
+		<td><input type="text" class="form-control" name="keyword" value="<?php echo htmlspecialchars($post['keyword'] ?? '')?>"><?php echo $errMsg['keyword']?></td>
 		<th class="pl-4"><?php echo $spText['common']['Status']?>:</th>
 		<td>
 			<select name="status" class="custom-select">
@@ -99,11 +99,17 @@
 	<?php
 	if(count($list) > 0) {
 		foreach($list as $i => $listInfo){
-			$diaryLink = scriptAJAXLinkHref(PLUGIN_SCRIPT_URL, 'content', "action=editDiary&project_id={$listInfo['id']}", "{$listInfo['title']}");
+			// htmlspecialchars() on the title - scriptAJAXLinkHref() does
+			// not escape its $linkText parameter at all (a wider,
+			// pre-existing gap in that shared helper, not something
+			// SeoDiary-specific to fix here), and title is real
+			// user-supplied content (createDiary()/updateDiary() only
+			// addslashes() it, never strip/escape)
+			$diaryLink = scriptAJAXLinkHref(PLUGIN_SCRIPT_URL, 'content', "action=editDiary&project_id={$listInfo['id']}", htmlspecialchars($listInfo['title']));
 			?>
 			<tr>
-				<td><?php echo $diaryLink?></td>				
-				<td><?php echo $listInfo['project_name']?></td>
+				<td><?php echo $diaryLink?></td>
+				<td><?php echo htmlspecialchars($listInfo['project_name'])?></td>
 				<td><?php echo $listInfo['category_label']?></td>
                 <td><?php echo $listInfo['due_date']?></td>
                 <td><?php echo $userIdList[$listInfo['assigned_user_id']]['username']?></td>

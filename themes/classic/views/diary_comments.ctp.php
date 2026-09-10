@@ -6,9 +6,9 @@
 			<select onchange="doDiaryAction('<?php echo PLUGIN_SCRIPT_URL?>', 'content', 'action=newComment', 'diary_id','diary_id')" name="diary_id" id="diary_id" class="custom-select" style="flex: 0 0 auto; width: auto;">
 					<?php foreach($diaryList as $drInfo){?>
 						<?php if($drInfo['id'] == $diaryId){?>
-							<option value="<?php echo $drInfo['id']?>" selected><?php echo $drInfo['title']?></option>
+							<option value="<?php echo $drInfo['id']?>" selected><?php echo htmlspecialchars($drInfo['title'])?></option>
 						<?php }else{?>
-							<option value="<?php echo $drInfo['id']?>"><?php echo $drInfo['title']?></option>
+							<option value="<?php echo $drInfo['id']?>"><?php echo htmlspecialchars($drInfo['title'])?></option>
 						<?php }?>
 					<?php }?>
 			</select>
@@ -19,7 +19,7 @@
            
         <div class="chat-message clearfix">        
 	        <div class="chat-message-content clearfix">
-				<pre class="chat-desc"><?php echo $diaryInfo['description']?></pre>
+				<pre class="chat-desc"><?php echo htmlspecialchars($diaryInfo['description'])?></pre>
 	         </div>
         </div>
 
@@ -29,8 +29,8 @@
     		        <?php
     				foreach($diaryCommentList as $i => $listInfo){
 						?> 
-						<div class="chat-container"> 
-				              <p class="chat-desc-small"><?php echo $listInfo['comments']?></p>
+						<div class="chat-container">
+				              <p class="chat-desc-small"><?php echo nl2br(htmlspecialchars($listInfo['comments']))?></p>
 				              <div style="clear: both;"></div>
 				              <h5 class="chat-name"><?php echo $userIdList[$listInfo['user_id']]['username']?></h5>
 				              <div style="clear: both;"></div>
@@ -43,7 +43,7 @@
         	</div>
     	<?php }?>
 		
-		<textarea name="comments" class="form-control" aria-autocomplete="list" aria-haspopup="true" placeholder="<?php echo $pluginText['Add your comment here']?>..."><?php echo $post['comments']?></textarea>
+		<textarea name="comments" class="form-control" aria-autocomplete="list" aria-haspopup="true" placeholder="<?php echo $pluginText['Add your comment here']?>..."><?php echo htmlspecialchars($post['comments'] ?? '')?></textarea>
 	    <?php echo $errMsg['comments']?>
 
 	    <table class="actionSec float-right mt-2">

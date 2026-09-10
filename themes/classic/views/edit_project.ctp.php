@@ -1,6 +1,6 @@
 <?php echo showSectionHead($spTextPanel['Edit Project']); ?>
 <form id="projectform">
-<input type="hidden" name="id" value="<?php echo $post['id']?>"/>
+<input type="hidden" name="id" value="<?php echo htmlspecialchars($post['id'] ?? '')?>"/>
 <table id="cust_tab">
 	<tr class="form_head">
 		<th width='30%'><?php echo $spTextPanel['Edit Project']?></th>
@@ -23,12 +23,12 @@
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $spText['common']['Name']?>:</td>
-		<td><input class="form-control" type="text" name="name" value="<?php echo $post['name']?>"><?php echo $errMsg['name']?></td>
+		<td><input class="form-control" type="text" name="name" value="<?php echo htmlspecialchars($post['name'] ?? '')?>"><?php echo $errMsg['name']?></td>
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $spText['label']['Description']?>:</td>
 		<td>
-			<textarea class="form-control" name="description"><?php echo $post['description']?></textarea>
+			<textarea class="form-control" name="description"><?php echo htmlspecialchars($post['description'] ?? '')?></textarea>
 			<?php echo $errMsg['description']?>
 		</td>
 	</tr>

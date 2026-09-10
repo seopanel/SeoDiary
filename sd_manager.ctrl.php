@@ -104,9 +104,45 @@ class SD_Manager extends SeoDiary {
 		$this->set ( 'categoryList', $categoryList );
 		$this->set( 'statusList', $this->statusList);
 		$this->set ( 'spTextReport', $this->getLanguageTexts('report', $_SESSION['lang_code']));
+
+		include_once(SP_CTRLPATH . '/settings.ctrl.php');
+		$this->set('localAiAvailable', SettingsController::isLocalAIEnabled());
+
 		$this->pluginRender ( 'new_diary' );
 	}
-	
+
+	/*
+	 * AJAX action: Local AI draft of a diary task's description from just
+	 * its title - unlike generateProjectAISummary() below, this generates
+	 * NEW content (same "the user reviews before using it" discipline as
+	 * LocalAIController::suggestMetaTags()), not a restate-only-the-facts
+	 * summary. Never auto-fired.
+	 */
+	function suggestDiaryDescription($info) {
+		include_once(SP_CTRLPATH . '/settings.ctrl.php');
+		if (!SettingsController::isLocalAIEnabled()) {
+			return ['ok' => false, 'description' => '', 'error' => 'Local AI is not enabled'];
+		}
+		if (empty($info['title'])) {
+			return ['ok' => false, 'description' => '', 'error' => 'Please enter a title first'];
+		}
+
+		$categoryLabel = '';
+		if (!empty($info['category_id'])) {
+			$catRow = $this->dbHelper->getRow('sd_category', 'id=' . intval($info['category_id']));
+			$categoryLabel = !empty($catRow['label']) ? $catRow['label'] : '';
+		}
+
+		$systemPrompt = 'You draft concise, actionable task descriptions for an SEO project task tracker. '
+			. 'Respond with ONLY the description text (a short paragraph or a few concrete steps), no preamble, no quotes.';
+		$prompt = 'Task title: ' . $info['title'] . "\n" . (!empty($categoryLabel) ? "Category: $categoryLabel\n" : '') . "\nDraft a description for this task.";
+
+		include_once(SP_CTRLPATH . '/localai.ctrl.php');
+		$userId = isLoggedIn();
+		$result = (new LocalAIController())->__callOllama($prompt, $systemPrompt, 20, $userId);
+		return ['ok' => $result['ok'], 'description' => $result['text'], 'error' => $result['error']];
+	}
+
 	/*
 	 * func to create diary
 	 */
@@ -345,28 +381,100 @@ class SD_Manager extends SeoDiary {
 		$projectCtrler = $this->createHelper ( 'Project' );
 		$projectList = $projectCtrler->__getAllProjects ( $userId, true );
 		$this->set ( 'projectList', $projectList );
-		
+
 		if (empty($info['project_id'] )) {
 			$projectId = $projectList[0]['id'];
 		} else {
 			$projectId = intval($info['project_id']);
+			// ownership check (IDOR fix): __getProjectInfo()/__getDiaryList()
+			// below have no ownership filtering of their own at all - a
+			// caller-supplied project_id was previously used as-is, letting
+			// a non-admin view (and, via getDiarytCommentCount(), the
+			// comment activity of) ANY project regardless of which
+			// website/user it actually belongs to. $projectList above is
+			// already correctly scoped to this user's own projects
+			// (__getAllProjects()'s own $isAdminCheck logic) - just needed
+			// to actually cross-check project_id against it.
+			if (!isAdmin()) {
+				$ownsProject = false;
+				foreach ($projectList as $p) { if ($p['id'] == $projectId) { $ownsProject = true; break; } }
+				if (!$ownsProject) $projectId = 0;
+			}
 		}
-		
+
 		if (empty($projectId)) {
 		    showErrorMsg($_SESSION['text']['common']['No Records Found']);
 		}
-		
+
 		$projectInfo = $projectCtrler->__getProjectInfo($projectId);
 		$this->set('projectInfo', $projectInfo);
-		
+
 		$diaryList = $this->__getDiaryList(" project_id = " . intval($projectId));
 		foreach ( $diaryList as $i => $listInfo ) {
 			$diaryList[$i]['comment_count'] = $this->getDiarytCommentCount($listInfo['id']);
 		}
-		
+
 		$this->set ( 'diaryList', $diaryList );
-		$this->set ( 'spTextSA', $this->getLanguageTexts('siteauditor', $_SESSION['lang_code']));		
+		$this->set ( 'spTextSA', $this->getLanguageTexts('siteauditor', $_SESSION['lang_code']));
+
+		include_once(SP_CTRLPATH . '/settings.ctrl.php');
+		$this->set('localAiAvailable', SettingsController::isLocalAIEnabled());
+
 		$this->pluginRender ( 'project_summery' );
+	}
+
+	/*
+	 * AJAX action: Local AI plain-language status summary of a project's
+	 * current diary entries (counts/overdue items) - restates ONLY the
+	 * given facts, same discipline as RecommendationsController::
+	 * generateInsightsSummary(). Ownership is enforced the same way
+	 * showProjectSummery() above now is - a non-admin can only summarize
+	 * their own project.
+	 */
+	function generateProjectAISummary($info) {
+		include_once(SP_CTRLPATH . '/settings.ctrl.php');
+		if (!SettingsController::isLocalAIEnabled()) {
+			return ['ok' => false, 'summary' => '', 'error' => 'Local AI is not enabled'];
+		}
+
+		$userId = isLoggedIn();
+		$projectId = intval($info['project_id']);
+		$projectCtrler = $this->createHelper('Project');
+		$projectList = $projectCtrler->__getAllProjects($userId, true);
+		if (!isAdmin()) {
+			$ownsProject = false;
+			foreach ($projectList as $p) { if ($p['id'] == $projectId) { $ownsProject = true; break; } }
+			if (!$ownsProject) {
+				return ['ok' => false, 'summary' => '', 'error' => 'Not authorized'];
+			}
+		}
+
+		$projectInfo = $projectCtrler->__getProjectInfo($projectId);
+		if (empty($projectInfo)) {
+			return ['ok' => false, 'summary' => '', 'error' => 'Project not found'];
+		}
+
+		$diaryList = $this->__getDiaryList(" project_id = $projectId");
+		if (empty($diaryList)) {
+			return ['ok' => true, 'summary' => 'No diary entries for this project yet.', 'error' => null];
+		}
+
+		$today = date('Y-m-d');
+		$lines = [];
+		foreach ($diaryList as $d) {
+			$overdue = ($d['due_date'] < $today && !in_array($d['status'], ['closed', 'cancelled'])) ? ' (OVERDUE)' : '';
+			$lines[] = '- [' . $d['status'] . ']' . $overdue . ' ' . $d['title'] . ' (due ' . $d['due_date'] . ')';
+		}
+		$listText = implode("\n", $lines);
+
+		$systemPrompt = 'You summarize a project\'s task list for a project manager in plain language. '
+			. 'You must ONLY restate and group the tasks given to you - never invent, assume, or add any '
+			. 'task, statistic, or recommendation not explicitly present in the list. Keep it to one short paragraph.';
+		$prompt = 'Project: ' . $projectInfo['name'] . "\n\nTasks:\n$listText\n\nWrite a one-paragraph plain-language status summary of exactly these tasks.";
+
+		include_once(SP_CTRLPATH . '/localai.ctrl.php');
+		$result = (new LocalAIController())->__callOllama($prompt, $systemPrompt, 25, $userId);
+		return ['ok' => $result['ok'], 'summary' => $result['text'], 'error' => $result['error']];
 	}
 	
 	/*

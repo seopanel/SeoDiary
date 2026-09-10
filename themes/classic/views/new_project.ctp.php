@@ -22,12 +22,12 @@
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $spText['common']['Name']?>:</td>
-		<td><input type="text" name="name" class="form-control" value="<?php echo $post['name']?>"><?php echo $errMsg['name']?></td>
+		<td><input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($post['name'] ?? '')?>"><?php echo $errMsg['name']?></td>
 	</tr>
 	<tr class="form_data">
 		<td><?php echo $spText['label']['Description']?>:</td>
 		<td>
-			<textarea name="description" class="form-control"><?php echo $post['description']?></textarea>
+			<textarea name="description" class="form-control"><?php echo htmlspecialchars($post['description'] ?? '')?></textarea>
 			<?php echo $errMsg['description']?>
 		</td>
 	</tr>

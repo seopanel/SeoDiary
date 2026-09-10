@@ -211,7 +211,31 @@ class SeoDiary extends SeoPluginsController {
 		$sdMgrCtrler = $this->createHelper('SD_Manager');
 		$sdMgrCtrler->showProjectSummery( $data );
 	}
-		
+
+	/*
+	 * AJAX action: Local AI plain-language status summary of a project's
+	 * diary entries - see SD_Manager::generateProjectAISummary(). Never
+	 * auto-fired; returns JSON.
+	 */
+	function generateProjectAISummary($data) {
+		$sdMgrCtrler = $this->createHelper('SD_Manager');
+		$result = $sdMgrCtrler->generateProjectAISummary($data);
+		header('Content-Type: application/json');
+		print json_encode($result);
+	}
+
+	/*
+	 * AJAX action: Local AI draft of a diary task's description from its
+	 * title - see SD_Manager::suggestDiaryDescription(). Never auto-fired;
+	 * returns JSON.
+	 */
+	function suggestDiaryDescription($data) {
+		$sdMgrCtrler = $this->createHelper('SD_Manager');
+		$result = $sdMgrCtrler->suggestDiaryDescription($data);
+		header('Content-Type: application/json');
+		print json_encode($result);
+	}
+
 	/*
 	 * function to send due-date reminder emails for open diary entries -
 	 * see diarycron.php and SD_Manager::startCronJob()
