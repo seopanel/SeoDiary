@@ -151,7 +151,12 @@ class SeoDiary extends SeoPluginsController {
 	 */
 	function editDiary($data) {
 		$sdMgrCtrler = $this->createHelper ( 'SD_Manager' );
-		$sdMgrCtrler->editDiary ( $data ['project_id'] );
+		// pre-existing bug, found while fixing ownership checks this round:
+		// this read $data['project_id'], but diary_manager.ctp.php's
+		// "editDiary" action link only ever sends diary_id, never
+		// project_id - so this silently no-oped (editDiary(null)) via the
+		// real UI every time
+		$sdMgrCtrler->editDiary ( $data ['diary_id'] );
 	}
 	
 	/*
@@ -167,7 +172,10 @@ class SeoDiary extends SeoPluginsController {
 	 */
 	function deleteDiary($data) {
 		$sdMgrCtrler = $this->createHelper ( 'SD_Manager' );
-		$sdMgrCtrler->deleteDiary ( $data ['project_id'] );
+		// same pre-existing param-name bug as editDiary() above -
+		// diary_manager.ctp.php's "deleteDiary" action link only ever
+		// sends diary_id
+		$sdMgrCtrler->deleteDiary ( $data ['diary_id'] );
 	}
 	
 	/*

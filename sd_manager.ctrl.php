@@ -143,10 +143,47 @@ class SD_Manager extends SeoDiary {
 		return ['ok' => $result['ok'], 'description' => $result['text'], 'error' => $result['error']];
 	}
 
+	// IDOR guard - a diary entry's real ownership boundary depends on
+	// SD_ALLOW_USER_PROJECTS the same way showSDList() above already
+	// branches: when project-scoped access is enabled, ownership follows
+	// the entry's project (and therefore its project's website); when
+	// it's disabled, a diary entry belongs to whoever it's assigned to
+	// or was created by.
+	function __verifyDiaryOwnership($diaryId) {
+		if (isAdmin()) return true;
+		$userId = isLoggedIn();
+		$diaryInfo = $this->__getDiaryInfo($diaryId);
+		if (empty($diaryInfo)) return false;
+		if (SD_ALLOW_USER_PROJECTS) {
+			$projectCtrler = $this->createHelper('Project');
+			return (bool) $projectCtrler->__verifyProjectOwnership($diaryInfo['project_id']);
+		}
+		return intval($diaryInfo['assigned_user_id']) === intval($userId) || intval($diaryInfo['created_user_id']) === intval($userId);
+	}
+
+	// same ownership boundary as __verifyDiaryOwnership(), but for a
+	// project_id being submitted (create/reassign) rather than an
+	// existing diary row - used to stop a non-admin creating/moving a
+	// diary entry under a project they don't have access to
+	function __verifyDiaryProjectAccess($projectId) {
+		if (isAdmin() || empty($projectId)) return true;
+		if (SD_ALLOW_USER_PROJECTS) {
+			$projectCtrler = $this->createHelper('Project');
+			return (bool) $projectCtrler->__verifyProjectOwnership($projectId);
+		}
+		// project-scoped access is off - any project_id is acceptable,
+		// same as showSDList()'s own condition for this setting
+		return true;
+	}
+
 	/*
 	 * func to create diary
 	 */
 	function createDiary($listInfo) {
+	    if (!$this->__verifyDiaryProjectAccess($listInfo['project_id'] ?? null)) {
+	        showErrorMsg($_SESSION['text']['label']['Access denied']);
+	        return;
+	    }
 	    $this->set ( 'post', $listInfo );
 	    $now = date('Y-m-d H:i:s');
 		$errMsg ['project_id'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['project_id'] ) );
@@ -216,9 +253,13 @@ class SD_Manager extends SeoDiary {
 	 * func to edit diary
 	 */
 	function editDiary($diaryId, $listInfo = '') {
-		
+
 		if (!empty( $diaryId )) {
-			
+			if (!$this->__verifyDiaryOwnership($diaryId)) {
+				showErrorMsg($_SESSION['text']['label']['Access denied']);
+				return;
+			}
+
 			if (empty($listInfo )) {
 				$listInfo = $this->__getDiaryInfo ( $diaryId );
 			}
@@ -244,7 +285,11 @@ class SD_Manager extends SeoDiary {
 	/*
 	 * func to update project
 	 */
-	function updateDiary($listInfo) {		
+	function updateDiary($listInfo) {
+		if (!$this->__verifyDiaryOwnership($listInfo['id'] ?? null) || !$this->__verifyDiaryProjectAccess($listInfo['project_id'] ?? null)) {
+			showErrorMsg($_SESSION['text']['label']['Access denied']);
+			return;
+		}
 		$this->set ( 'post', $listInfo );
 		$errMsg = [];
 		$errMsg ['project_id'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['project_id'] ) );
@@ -289,6 +334,10 @@ class SD_Manager extends SeoDiary {
 	 * func to delete project
 	 */
 	function deleteDiary($diaryId) {
+		if (!$this->__verifyDiaryOwnership($diaryId)) {
+			showErrorMsg($_SESSION['text']['label']['Access denied']);
+			return;
+		}
 		$diaryId = intval ( $diaryId );
 		$sql = "delete from sd_seo_diary where id=" . intval ( $diaryId );
 		$this->db->query ( $sql );
@@ -328,9 +377,17 @@ class SD_Manager extends SeoDiary {
 		if (empty($info['diary_id'] )) {
 		    $diaryId = $diaryList[0]['id'];
 		} else {
+			// IDOR: an explicitly-supplied diary_id was previously used
+			// as-is with no check it's actually one of this user's own
+			// diary entries - letting a non-admin view (and comment on)
+			// the comment thread of ANY diary entry
 			$diaryId = intval($info['diary_id']);
+			if (!$this->__verifyDiaryOwnership($diaryId)) {
+				showErrorMsg($_SESSION['text']['label']['Access denied']);
+				return;
+			}
 		}
-		
+
 		if (empty($diaryId)) {
 		    showErrorMsg($_SESSION['text']['common']['No Records Found']);
 		}
@@ -355,10 +412,14 @@ class SD_Manager extends SeoDiary {
 	 */
 	function createDiaryComment($listInfo) {
 	    $userId = isLoggedIn ();
+	    if (!$this->__verifyDiaryOwnership($listInfo['diary_id'] ?? null)) {
+	        showErrorMsg($_SESSION['text']['label']['Access denied']);
+	        return;
+	    }
 	    $this->set ( 'post', $listInfo );
 	    $errMsg ['diary_id'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['diary_id'] ) );
 	    $errMsg ['comments'] = formatErrorMsg ( $this->validate->checkBlank ( $listInfo ['comments'] ) );
-	    
+
 	    if (! $this->validate->flagErr) {
 	        $sql = "INSERT INTO `sd_diary_comments`( `diary_id`, `user_id`, `comments`,  `updated_time`) 
                     VALUES ('" . intval ( $listInfo ['diary_id'] ) . "','" . intval ( $userId ) . "',

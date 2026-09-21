@@ -68,6 +68,18 @@ class Project extends SeoDiary {
 		$this->pluginRender( 'new_project' );
 	}
 	
+	// IDOR guard - a project belongs to a website via website_id, and
+	// website ownership is websites.user_id (see
+	// WebsiteController::__verifyWebsiteOwnership()). Reused here rather
+	// than re-implemented, since it's the same ownership fact either way.
+	function __verifyProjectOwnership($projectId) {
+		if (isAdmin()) return true;
+		$projectInfo = $this->__getProjectInfo($projectId);
+		if (empty($projectInfo) || empty($projectInfo['website_id'])) return false;
+		$websiteCtrler = new WebsiteController();
+		return $websiteCtrler->__verifyWebsiteOwnership($projectInfo['website_id']);
+	}
+
 	/*
 	 * func to create project
 	 */
@@ -77,8 +89,18 @@ class Project extends SeoDiary {
 		$errMsg ['website_id'] = formatErrorMsg( $this->validate->checkBlank( $listInfo ['website_id'] ) );
 		$errMsg ['name'] = formatErrorMsg( $this->validate->checkBlank( $listInfo ['name'] ) );
 		$errMsg ['description'] = formatErrorMsg( $this->validate->checkBlank( $listInfo ['description'] ) );
-		
-		if(! $this->validate->flagErr) {			
+
+		// IDOR: without this, a non-admin could create a project under a
+		// website they don't own by just supplying its website_id
+		if (!$this->validate->flagErr && !empty($listInfo['website_id'])) {
+			$websiteCtrler = new WebsiteController();
+			if (!isAdmin() && !$websiteCtrler->__verifyWebsiteOwnership($listInfo['website_id'])) {
+				showErrorMsg($_SESSION['text']['label']['Access denied']);
+				return;
+			}
+		}
+
+		if(! $this->validate->flagErr) {
 		    if(!$this->__checkProjectExists($listInfo ['name'])) {
 				$sql = "insert into sd_projects(website_id, name,description,status)
 					values(" . intval( $listInfo ['website_id'] ) . ", '" . addslashes( $listInfo ['name'] ) . "','" 
@@ -100,9 +122,13 @@ class Project extends SeoDiary {
 	 */
 	function editProject($projectId, $listInfo = '') {
 		$userId = isLoggedIn();
-		
+
 		if(!empty( $projectId )) {
-			
+			if (!$this->__verifyProjectOwnership($projectId)) {
+				showErrorMsg($_SESSION['text']['label']['Access denied']);
+				return;
+			}
+
 			if(empty( $listInfo )) {
 				$listInfo = $this->__getProjectInfo( $projectId );
 			}
@@ -119,13 +145,28 @@ class Project extends SeoDiary {
 	 * func to update project
 	 */
 	function updateProject($listInfo) {
+		if (!$this->__verifyProjectOwnership($listInfo['id'])) {
+			showErrorMsg($_SESSION['text']['label']['Access denied']);
+			return;
+		}
 		$this->set( 'post', $listInfo );
 		$errMsg ['website_id'] = formatErrorMsg( $this->validate->checkBlank( $listInfo ['website_id'] ) );
 		$errMsg ['name'] = formatErrorMsg( $this->validate->checkBlank( $listInfo ['name'] ) );
 		$errMsg ['description'] = formatErrorMsg( $this->validate->checkBlank( $listInfo ['description'] ) );
-		
-		if(! $this->validate->flagErr) {			
-			
+
+		// also verify the (possibly reassigned) target website_id belongs
+		// to the caller - otherwise a non-admin could re-point their own
+		// project at a website they don't own
+		if (!$this->validate->flagErr && !empty($listInfo['website_id'])) {
+			$websiteCtrler = new WebsiteController();
+			if (!isAdmin() && !$websiteCtrler->__verifyWebsiteOwnership($listInfo['website_id'])) {
+				showErrorMsg($_SESSION['text']['label']['Access denied']);
+				return;
+			}
+		}
+
+		if(! $this->validate->flagErr) {
+
 		    if($this->__checkProjectExists($listInfo ['name'], $listInfo ['id'] )) {
 				$this->validate->flagErr = true;
 				$errMsg ['name'] = formatErrorMsg( $this->spTextSA['projectalreadyexist'] );
@@ -151,16 +192,24 @@ class Project extends SeoDiary {
 	 * func to delete project
 	 */
 	function deleteProject($projectId) {
+		if (!$this->__verifyProjectOwnership($projectId)) {
+			showErrorMsg($_SESSION['text']['label']['Access denied']);
+			return;
+		}
 		$projectId = intval( $projectId );
 		$sql = "delete from sd_projects where id=" . intval( $projectId );
 		$this->db->query( $sql );
 		$this->showProjectsManager();
 	}
-	
+
 	/*
 	 * func to change status
 	 */
 	function __changeStatus($projectId, $status) {
+		if (!$this->__verifyProjectOwnership($projectId)) {
+			showErrorMsg($_SESSION['text']['label']['Access denied']);
+			return;
+		}
 		$projectId = intval( $projectId );
 		$status = intval( $status );
 		$sql = "update sd_projects set status=$status where id=$projectId";
