@@ -84,7 +84,7 @@ CREATE TABLE `sd_settings` (
   `set_val` text COLLATE utf8_unicode_ci NOT NULL,
   `set_type` enum('small','bool','medium','large','text') CHARACTER SET latin1 DEFAULT 'small',
   `display` tinyint(1) NOT NULL DEFAULT '1'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Dumping data for table `sd_settings`
