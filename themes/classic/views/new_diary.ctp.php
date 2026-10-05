@@ -3,10 +3,22 @@
    table classes this replaces are shared globals used across dozens of
    other admin pages, so this is a from-scratch look for this dialog
    rather than a retheme of those classes (which would ripple out to
-   every other page still using them). */
+   every other page still using them). This view renders in two places:
+   inside the app's jQuery UI popup (scriptDoLoadDialog(), card chrome
+   already supplied by .ui-dialog) and as a plain full-page route (Plugins
+   > Seo Diary > Diary Manager > New Diary, no surrounding chrome at all -
+   see diary_manager.ctp.php's link). Without its own card frame it just
+   floats as bare fields against a huge empty page in that second context,
+   so .sd-form carries its own border/radius/shadow rather than relying on
+   a wrapper that isn't always there. */
 .sd-form {
     max-width: 640px;
-    margin: 0 auto;
+    margin: 24px auto;
+    background: #fff;
+    border: 1px solid #e3e8f0;
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(20, 30, 60, 0.06);
+    padding: 28px 32px;
 }
 .sd-form-header {
     display: flex;
