@@ -396,7 +396,17 @@ class SD_Manager extends SeoDiary {
 		}
 
 		if (empty($diaryId)) {
-		    showErrorMsg($_SESSION['text']['common']['No Records Found']);
+		    // was showErrorMsg(...) - a bare red error banner that
+		    // exit()s the page with no way forward. A brand-new account
+		    // (or one with every diary entry deleted) hits this on its
+		    // very first visit to Diary Comments.
+		    $this->set('emptyIcon', 'fa-comments');
+		    $this->set('emptyHeading', 'No Diary Entries Yet');
+		    $this->set('emptyMessage', 'Create a diary entry first, then come back here to add comments to it.');
+		    $this->set('emptyCtaAction', 'action=newDiary');
+		    $this->set('emptyCtaLabel', 'Create Diary Entry');
+		    $this->pluginRender('empty_state');
+		    return;
 		}
 
 		$diaryInfo = $this->__getDiaryInfo($diaryId);
@@ -471,7 +481,16 @@ class SD_Manager extends SeoDiary {
 		}
 
 		if (empty($projectId)) {
-		    showErrorMsg($_SESSION['text']['common']['No Records Found']);
+		    // was showErrorMsg(...) - a bare red error banner that
+		    // exit()s the page with no way forward. A brand-new account
+		    // hits this on its very first visit to Project Summary.
+		    $this->set('emptyIcon', 'fa-folder-open');
+		    $this->set('emptyHeading', 'No Projects Yet');
+		    $this->set('emptyMessage', 'Create a project to start tracking diary entries and tasks for your website.');
+		    $this->set('emptyCtaAction', 'action=newProject');
+		    $this->set('emptyCtaLabel', 'Create Project');
+		    $this->pluginRender('empty_state');
+		    return;
 		}
 
 		$projectInfo = $projectCtrler->__getProjectInfo($projectId);

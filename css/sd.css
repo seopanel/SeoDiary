@@ -263,6 +263,49 @@
     font-size: 13.5px;
 }
 
+/* Full-page empty state (empty_state.ctp.php) - a whole section with
+   nothing to show yet (no projects at all, no diary entries at all),
+   reached directly rather than via a list that's just empty. Mirrors the
+   core app's own dashboard/no_websites.ctp.php look (big muted icon,
+   heading, subtext, prominent CTA) rather than inventing a new visual
+   language - this plugin had been using showErrorMsg() for this instead,
+   which prints a bare red error banner and exit()s, leaving the rest of
+   the page blank with no way forward. */
+.sd-empty-page {
+    background: #fff;
+    border: 1px solid #e3e8f0;
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(20, 30, 60, 0.06);
+    max-width: 960px;
+    margin: 24px auto;
+    padding: 60px 20px;
+    text-align: center;
+}
+.sd-empty-page-icon {
+    opacity: 0.5;
+    margin-bottom: 20px;
+}
+.sd-empty-page-icon i {
+    font-size: 64px;
+    color: #8a93a3;
+}
+.sd-empty-page h3 {
+    margin: 0 0 12px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+.sd-empty-page p {
+    color: #6b7280;
+    margin: 0 0 24px;
+    font-size: 14.5px;
+}
+.sd-empty-page .btn {
+    border-radius: 8px;
+    padding: 10px 24px;
+    font-weight: 600;
+}
+
 .chat-container {
     border: 2px solid #dedede;
     background: rgb(211, 225, 236);
