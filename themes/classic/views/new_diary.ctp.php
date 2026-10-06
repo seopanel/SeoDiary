@@ -12,13 +12,44 @@
    so .sd-form carries its own border/radius/shadow rather than relying on
    a wrapper that isn't always there. */
 .sd-form {
-    max-width: 640px;
+    /* 640px read as a small island on a wide screen next to this
+       plugin's other pages, which all use a full-width #cust_tab table
+       (see edit_project.ctp.php/new_project.ctp.php) - widened to read
+       as a deliberately-sized card rather than a cramped leftover. */
+    max-width: 960px;
     margin: 24px auto;
     background: #fff;
     border: 1px solid #e3e8f0;
     border-radius: 14px;
     box-shadow: 0 1px 3px rgba(20, 30, 60, 0.06);
     padding: 28px 32px;
+}
+.sd-form-empty-state {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #fff8e6;
+    border: 1px solid #f3dfa3;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+}
+.sd-form-empty-state i {
+    font-size: 18px;
+    color: #b8860b;
+    flex-shrink: 0;
+}
+.sd-form-empty-state p {
+    margin: 0;
+    font-size: 13.5px;
+    color: #5a4a1a;
+}
+.sd-form-empty-state a {
+    font-weight: 700;
+}
+.sd-form .error {
+    display: block;
+    margin-top: 5px;
 }
 .sd-form-header {
     display: flex;
@@ -138,11 +169,22 @@
         <h3><?php echo $pluginText['New Diary']?></h3>
     </div>
 
+    <?php if (empty($projectList)) { ?>
+    <div class="sd-form-empty-state">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>
+            You don't have any projects yet - a diary entry has to belong to one.
+            <a href="javascript:void(0);" onclick="<?php echo pluginGETMethod('action=newProject', 'content')?>">Create a project first</a>.
+        </p>
+    </div>
+    <?php } ?>
+
     <form id="projectform">
         <div class="sd-form-row-pair">
             <div class="sd-form-row">
                 <label><?php echo $spText['label']['Project']?></label>
                 <select name="project_id" class="custom-select">
+                    <option value="">-- <?php echo $spText['common']['Select']?> --</option>
                     <?php foreach($projectList as $projectInfo){?>
                         <?php if($projectInfo['id'] == $post['project_id']){?>
                             <option value="<?php echo $projectInfo['id']?>" selected><?php echo $projectInfo['name']?></option>
@@ -151,10 +193,12 @@
                         <?php }?>
                     <?php }?>
                 </select>
+                <?php echo $errMsg['project_id']?>
             </div>
             <div class="sd-form-row">
                 <label><?php echo $spText['common']['Category']?></label>
                 <select name="category_id" class="custom-select">
+                    <option value="">-- <?php echo $spText['common']['Select']?> --</option>
                     <?php foreach($categoryList as $categoryInfo){?>
                         <?php if($categoryInfo['id'] == $post['category_id']){?>
                             <option value="<?php echo $categoryInfo['id']?>" selected><?php echo $categoryInfo['label']?></option>
@@ -163,6 +207,7 @@
                         <?php }?>
                     <?php }?>
                 </select>
+                <?php echo $errMsg['category_id']?>
             </div>
         </div>
 
@@ -260,6 +305,7 @@
                         <?php }?>
                     <?php }?>
                 </select>
+                <?php echo $errMsg['status']?>
             </div>
             <div class="sd-form-row">
                 <label>&nbsp;</label>
