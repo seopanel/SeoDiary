@@ -1,66 +1,57 @@
-<?php echo showSectionHead($pluginText["Diary Comments"]); ?>
-<form id="projectform">
-	<div id="live-chat">
-		<header class="clearfix d-flex align-items-center">
-			<span style="margin-right: 10px;"><?php echo $spText['common']['Name']?>:</span>
-			<select onchange="doDiaryAction('<?php echo PLUGIN_SCRIPT_URL?>', 'content', 'action=newComment', 'diary_id','diary_id')" name="diary_id" id="diary_id" class="custom-select" style="flex: 0 0 auto; width: auto;">
-					<?php foreach($diaryList as $drInfo){?>
-						<?php if($drInfo['id'] == $diaryId){?>
-							<option value="<?php echo $drInfo['id']?>" selected><?php echo htmlspecialchars($drInfo['title'])?></option>
-						<?php }else{?>
-							<option value="<?php echo $drInfo['id']?>"><?php echo htmlspecialchars($drInfo['title'])?></option>
-						<?php }?>
-					<?php }?>
-			</select>
-		</header>
-	</div>
-	<div class="chat">      
-    <div class="chat-history"> 
-           
-        <div class="chat-message clearfix">        
-	        <div class="chat-message-content clearfix">
-				<pre class="chat-desc"><?php echo htmlspecialchars($diaryInfo['description'])?></pre>
-	         </div>
+<div class="sd-form">
+    <div class="sd-form-header">
+        <i class="fas fa-comments"></i>
+        <h3><?php echo $pluginText["Diary Comments"]?></h3>
+    </div>
+
+    <form id="projectform">
+        <div class="sd-selector-bar">
+            <span><?php echo $spText['common']['Name']?>:</span>
+            <select onchange="doDiaryAction('<?php echo PLUGIN_SCRIPT_URL?>', 'content', 'action=newComment', 'diary_id','diary_id')" name="diary_id" id="diary_id" class="custom-select">
+                <?php foreach($diaryList as $drInfo){?>
+                    <?php if($drInfo['id'] == $diaryId){?>
+                        <option value="<?php echo $drInfo['id']?>" selected><?php echo htmlspecialchars($drInfo['title'])?></option>
+                    <?php }else{?>
+                        <option value="<?php echo $drInfo['id']?>"><?php echo htmlspecialchars($drInfo['title'])?></option>
+                    <?php }?>
+                <?php }?>
+            </select>
+            <?php echo $errMsg['diary_id']?>
         </div>
 
-		<?php if(count($diaryCommentList) > 0) {?>
-        	<div class="chat-message clearfix">        
-    	        <div class="chat-message-content clearfix"> 
-    		        <?php
-    				foreach($diaryCommentList as $i => $listInfo){
-						?> 
-						<div class="chat-container">
-				              <p class="chat-desc-small"><?php echo nl2br(htmlspecialchars($listInfo['comments']))?></p>
-				              <div style="clear: both;"></div>
-				              <h5 class="chat-name"><?php echo $userIdList[$listInfo['user_id']]['username']?></h5>
-				              <div style="clear: both;"></div>
-				           	  <span class="chat-time"><?php echo $listInfo['updated_time']?></span>
-				        </div>
-						<?php
-    				}
-    				?>
-    	        </div>
-        	</div>
-    	<?php }?>
-		
-		<textarea name="comments" class="form-control" aria-autocomplete="list" aria-haspopup="true" placeholder="<?php echo $pluginText['Add your comment here']?>..."><?php echo htmlspecialchars($post['comments'] ?? '')?></textarea>
-	    <?php echo $errMsg['comments']?>
+        <div class="sd-source-desc"><?php echo htmlspecialchars($diaryInfo['description'])?></div>
 
-	    <table class="actionSec float-right mt-2">
-        	<tr>
-            	<td>
-                 	<?php $actFun1 = SP_DEMO ? "alertDemoMsg()" : pluginPOSTMethod('projectform', 'content', 'action=newComment'); ?>
-            		<a onclick="<?php echo $actFun1?>" href="javascript:void(0);" class="btn btn-warning">
-                 		<?php echo $spText['button']['Cancel']?>
-                 	</a>&nbsp;
+        <?php if(count($diaryCommentList) > 0) {?>
+        <div class="sd-item-list">
+            <?php foreach($diaryCommentList as $i => $listInfo){?>
+                <div class="sd-comment">
+                    <p class="sd-comment-text"><?php echo nl2br(htmlspecialchars($listInfo['comments']))?></p>
+                    <div class="sd-comment-meta">
+                        <span><?php echo htmlspecialchars($userIdList[$listInfo['user_id']]['username'] ?? '')?></span>
+                        <span><?php echo $listInfo['updated_time']?></span>
+                    </div>
+                </div>
+            <?php }?>
+        </div>
+        <?php } else { ?>
+        <p class="sd-no-items"><?php echo $spText['common']['No Records Found']?></p>
+        <?php } ?>
 
-                 	<?php $actFun = SP_DEMO ? "alertDemoMsg()" : pluginPOSTMethod('projectform', 'content', 'action=createComment'); ?>
-                 	<a onclick="<?php echo $actFun?>" href="javascript:void(0);" class="btn btn-primary">
-                 		<?php echo $pluginText['Add Comment']?>
-                 	</a>
-            	</td>
-        	</tr>
-        </table>
-    </div>
+        <div class="sd-form-row">
+            <label><?php echo $pluginText['Add Comment']?></label>
+            <textarea name="comments" placeholder="<?php echo $pluginText['Add your comment here']?>..."><?php echo htmlspecialchars($post['comments'] ?? '')?></textarea>
+            <?php echo $errMsg['comments']?>
+        </div>
+
+        <div class="sd-form-actions">
+            <?php $actFun1 = SP_DEMO ? "alertDemoMsg()" : pluginPOSTMethod('projectform', 'content', 'action=newComment'); ?>
+            <a onclick="<?php echo $actFun1?>" href="javascript:void(0);" class="btn btn-warning">
+                <?php echo $spText['button']['Cancel']?>
+            </a>
+            <?php $actFun = SP_DEMO ? "alertDemoMsg()" : pluginPOSTMethod('projectform', 'content', 'action=createComment'); ?>
+            <a onclick="<?php echo $actFun?>" href="javascript:void(0);" class="btn btn-primary">
+                <?php echo $pluginText['Add Comment']?>
+            </a>
+        </div>
+    </form>
 </div>
-</form>

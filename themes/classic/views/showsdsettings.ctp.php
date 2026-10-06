@@ -1,68 +1,39 @@
-<?php echo showSectionHead($spTextPanel['Settings']); ?>
-<?php if(!empty($saved)) showSuccessMsg($spSettingsText['allsettingssaved'], false); ?>
-<form id="updateSettings">
-<input type="hidden" value="update" name="sec">
-<table id="cust_tab">
-	<tr class="form_head">
-		<th width='30%'><?php echo $spTextPanel['Settings']?></th>
-		<th>&nbsp;</th>
-	</tr>
-	<?php 
-	foreach( $settingsList as $i => $listInfo){ 
-		switch($listInfo['set_type']){
-			
-			case "small":
-				$width = 40;
-				break;
+<div class="sd-form">
+    <div class="sd-form-header">
+        <i class="fas fa-sliders-h"></i>
+        <h3><?php echo $spTextPanel['Settings']?></h3>
+    </div>
 
-			case "bool":
-				if(empty($listInfo['set_val'])){
-					$selectYes = "";					
-					$selectNo = "selected";
-				}else{					
-					$selectYes = "selected";					
-					$selectNo = "";
-				}
-				break;
-				
-			case "medium":
-				$width = 200;
-				break;
+    <?php if(!empty($saved)) showSuccessMsg($spSettingsText['allsettingssaved'], false); ?>
 
-			case "large":
-			case "text":
-				$width = 500;
-				break;
-		}
+    <form id="updateSettings">
+        <input type="hidden" value="update" name="sec">
 
-		?>
-     	<tr class="form_data">
-			<td><?php echo $pluginText[$listInfo['set_name']]?>:</td>
-		 	<?php if($listInfo['set_type'] != 'text'){?>
-				<?php if($listInfo['set_type'] == 'bool'){?>
-				<td class="td_right_col">
-					<select name="<?php echo $listInfo['set_name']?>" class="custom-select">
-						<option value="1" <?php echo $selectYes?>><?php echo $spText['common']['Yes']?></option>
-						<option value="0" <?php echo $selectNo?>><?php echo $spText['common']['No']?></option>
-					</select>
-					<?php } ?>
-				</td>
-				<?php } ?>
-	    </tr>
-	<?php }?>
+        <?php foreach($settingsList as $i => $listInfo){ ?>
+        <div class="sd-form-row">
+            <label><?php echo $pluginText[$listInfo['set_name']]?></label>
+            <?php if ($listInfo['set_type'] == 'bool') { ?>
+                <select name="<?php echo $listInfo['set_name']?>" class="custom-select">
+                    <option value="1" <?php echo !empty($listInfo['set_val']) ? 'selected' : ''?>><?php echo $spText['common']['Yes']?></option>
+                    <option value="0" <?php echo empty($listInfo['set_val']) ? 'selected' : ''?>><?php echo $spText['common']['No']?></option>
+                </select>
+            <?php } else if ($listInfo['set_type'] == 'large' || $listInfo['set_type'] == 'text') { ?>
+                <textarea name="<?php echo $listInfo['set_name']?>"><?php echo htmlspecialchars($listInfo['set_val'] ?? '')?></textarea>
+            <?php } else { ?>
+                <input type="text" name="<?php echo $listInfo['set_name']?>" value="<?php echo htmlspecialchars($listInfo['set_val'] ?? '')?>"
+                    <?php echo $listInfo['set_type'] == 'small' ? 'style="max-width: 200px;"' : ''?>>
+            <?php } ?>
+        </div>
+        <?php } ?>
 
-</table>
-<table class="actionSec float-right mt-2">
-	<tr>
-    	<td>
-    		<a onclick="<?php echo pluginGETMethod('action=settings', 'content')?>" href="javascript:void(0);" class="btn btn-warning">
-         		<?php echo $spText['button']['Cancel']?>
-         	</a>&nbsp;
-         	<?php $actFun = SP_DEMO ? "alertDemoMsg()" : pluginConfirmPOSTMethod('updateSettings', 'content', 'action=updateSettings');?>
-         	<a onclick="<?php echo $actFun?>" href="javascript:void(0);" class="btn btn-primary">
-         		<?php echo $spText['button']['Proceed']?>
-         	</a>
-    	</td>
-	</tr>
-</table>
-</form>
+        <div class="sd-form-actions">
+            <a onclick="<?php echo pluginGETMethod('action=settings', 'content')?>" href="javascript:void(0);" class="btn btn-warning">
+                <?php echo $spText['button']['Cancel']?>
+            </a>
+            <?php $actFun = SP_DEMO ? "alertDemoMsg()" : pluginConfirmPOSTMethod('updateSettings', 'content', 'action=updateSettings');?>
+            <a onclick="<?php echo $actFun?>" href="javascript:void(0);" class="btn btn-primary">
+                <?php echo $spText['button']['Proceed']?>
+            </a>
+        </div>
+    </form>
+</div>

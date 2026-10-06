@@ -34,13 +34,16 @@ class SDSettings extends SeoDiary{
 		
 		$settingsList = $this->__getAllSDSettings(true);
 		foreach($settingsList as $setInfo){
-			switch($setInfo['set_name']){
-				default:
-					$postInfo[$setInfo['set_name']] = intval($postInfo[$setInfo['set_name']]);
-					break;
+			// bool settings post a 0/1 <select> - everything else
+			// (small/medium/large/text) is a free-text value, which
+			// intval()'ing unconditionally used to zero out (this path
+			// was never actually exercised until the view below grew
+			// inputs for those types - both were fixed together)
+			if ($setInfo['set_type'] == 'bool') {
+				$postInfo[$setInfo['set_name']] = intval($postInfo[$setInfo['set_name']]);
 			}
-			
-			$sql = "update sd_settings set set_val='".addslashes($postInfo[$setInfo['set_name']])."' 
+
+			$sql = "update sd_settings set set_val='".addslashes($postInfo[$setInfo['set_name']])."'
 					where set_name='".addslashes($setInfo['set_name'])."'";
 			$this->db->query($sql);
 		}

@@ -30,9 +30,23 @@ class SeoDiary extends SeoPluginsController {
 		$this->set ( 'spTextPanel', $this->getLanguageTexts('panel', $_SESSION['lang_code']));
         $settingsCtrler = $this->createHelper('SDSettings');
         $settingsCtrler->defineAllPluginSystemSettings();
-		
+
 		if (! defined ( 'PLUGIN_PATH' )) {
 			define ( 'PLUGIN_PATH', $this->pluginPath );
+		}
+
+		// css/sd.css (the .sd-form/.sd-card design system every view in
+		// this plugin now depends on) previously only loaded as a side
+		// effect of SeoPluginsController::showSeoPlugins() building the
+		// plugin browser's left menu - i.e. only if the user happened to
+		// reach a page via that menu first. A direct action dispatch
+		// (every AJAX nav after the first click, and any deep link - e.g.
+		// the dashboard's "Add to SEO Diary" button) skipped it entirely,
+		// so every view rendered as unstyled HTML. Loading it here
+		// instead guarantees it on every single action, not just the ones
+		// reached through that one menu.
+		if (empty($data['not_set_global_vars'])) {
+			echo $this->loadAllPluginCss(PLUGIN_PATH . "/css", $this->pluginWebPath . "/css");
 		}
 	}
 	

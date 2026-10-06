@@ -278,6 +278,13 @@ class SD_Manager extends SeoDiary {
 			$this->set ( 'categoryList', $categoryList );
 			$this->set( 'statusList', $this->statusList);
 			$this->set ( 'spTextReport', $this->getLanguageTexts('report', $_SESSION['lang_code']));
+
+			// AI-draft parity with new_diary.ctp.php - same fields, same
+			// $localAiAvailable gate, previously only wired up for the
+			// create form
+			include_once(SP_CTRLPATH . '/settings.ctrl.php');
+			$this->set('localAiAvailable', SettingsController::isLocalAIEnabled());
+
 			$this->pluginRender ( 'edit_diary' );
 		}
 	}

@@ -1,5 +1,268 @@
 @CHARSET "UTF-8";
 
+/* ==========================================================================
+   SeoDiary shared design system - card-based forms/lists, replacing the old
+   #cust_tab/.form_head/.form_data table look plugin-wide. Centralized here
+   (rather than duplicated as an inline <style> per view, the way new_diary
+   first did it) since every .ctp.php in this plugin loads this file
+   automatically (see SeoPluginsController::loadAllPluginCss()).
+   ========================================================================== */
+
+.sd-form,
+.sd-card {
+    max-width: 960px;
+    margin: 24px auto;
+    background: #fff;
+    border: 1px solid #e3e8f0;
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(20, 30, 60, 0.06);
+    padding: 28px 32px;
+}
+/* List/table pages (diary manager, my tasks, projects manager) hold a lot
+   more horizontal content (multi-column tables, filter bars) than a short
+   form - letting those stretch wider keeps columns from feeling squeezed. */
+.sd-card-wide {
+    max-width: 1280px;
+}
+.sd-form-header,
+.sd-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e8edf5;
+}
+.sd-form-header i,
+.sd-card-header i {
+    font-size: 20px;
+    color: #1a73e8;
+}
+.sd-form-header h3,
+.sd-card-header h3 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+.sd-form-row {
+    margin-bottom: 16px;
+}
+.sd-form-row-pair {
+    display: flex;
+    gap: 16px;
+}
+.sd-form-row-pair .sd-form-row {
+    flex: 1;
+    min-width: 0;
+}
+.sd-form label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #5a6372;
+    margin-bottom: 6px;
+}
+.sd-form input[type="text"],
+.sd-form select,
+.sd-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 12px;
+    font-size: 14px;
+    color: #1a1a2e;
+    background: #fafbfd;
+    border: 1px solid #d8dee8;
+    border-radius: 8px;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+.sd-form input[type="text"]:focus,
+.sd-form select:focus,
+.sd-form textarea:focus {
+    outline: none;
+    background: #fff;
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.12);
+}
+.sd-form textarea {
+    min-height: 90px;
+    resize: vertical;
+    font-family: inherit;
+}
+.sd-form-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.sd-form-check input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #1a73e8;
+}
+.sd-form-check label {
+    margin: 0;
+    text-transform: none;
+    font-weight: 500;
+    font-size: 13.5px;
+    letter-spacing: normal;
+    color: #333;
+}
+.sd-ai-draft {
+    background: #eef2fb;
+    border: 1px solid #d3def5;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+}
+.sd-ai-draft p {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: #64748b;
+}
+.sd-ai-draft .btn {
+    border-radius: 7px;
+}
+.sd-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px solid #e8edf5;
+}
+.sd-form-actions .btn {
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-weight: 600;
+}
+.sd-empty-state {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #fff8e6;
+    border: 1px solid #f3dfa3;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+}
+.sd-empty-state i {
+    font-size: 18px;
+    color: #b8860b;
+    flex-shrink: 0;
+}
+.sd-empty-state p {
+    margin: 0;
+    font-size: 13.5px;
+    color: #5a4a1a;
+}
+.sd-empty-state a {
+    font-weight: 700;
+}
+/* Empty-state treatment for a genuinely empty list table (no records found
+   after filtering, or none exist yet) - softer than .sd-empty-state's
+   warning-amber tone, since an empty list isn't a problem to fix. */
+.sd-empty-row {
+    text-align: center;
+    padding: 40px 20px !important;
+    color: #8a93a3;
+}
+.sd-empty-row i {
+    display: block;
+    font-size: 26px;
+    margin-bottom: 10px;
+    color: #c3cad6;
+}
+.sd-filter-bar {
+    background: #f7f9fc;
+    border: 1px solid #e8edf5;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+}
+.sd-form .error {
+    display: block;
+    margin-top: 5px;
+}
+
+/* Comment thread / project-diary-item list (diary_comments.ctp.php,
+   project_summery.ctp.php) - replaces the old #live-chat/.chat/.chat-history
+   widget (flat dark header, fixed 900px scroll box even when empty). */
+.sd-selector-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.sd-selector-bar span {
+    font-size: 13px;
+    font-weight: 700;
+    color: #5a6372;
+    white-space: nowrap;
+}
+.sd-selector-bar select {
+    flex: 0 0 auto;
+    min-width: 260px;
+}
+.sd-source-desc {
+    background: #f7f9fc;
+    border: 1px solid #e8edf5;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    font-size: 14px;
+    color: #333;
+    white-space: pre-wrap;
+}
+.sd-item-list {
+    max-height: 560px;
+    overflow-y: auto;
+    margin-bottom: 18px;
+}
+.sd-comment,
+.sd-item-card {
+    border: 1px solid #e8edf5;
+    background: #fafbfd;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+}
+.sd-comment-text,
+.sd-item-card p {
+    margin: 0 0 8px;
+    font-size: 14px;
+    color: #1a1a2e;
+    white-space: pre-wrap;
+}
+.sd-comment-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #8a93a3;
+}
+.sd-item-card h5 {
+    margin: 0 0 6px;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+.sd-item-card a.sd-item-link {
+    font-size: 12.5px;
+    color: #1a73e8;
+    font-weight: 600;
+    text-decoration: none;
+}
+.sd-item-card a.sd-item-link:hover {
+    text-decoration: underline;
+}
+.sd-no-items {
+    text-align: center;
+    padding: 28px 16px;
+    color: #8a93a3;
+    font-size: 13.5px;
+}
+
 .chat-container {
     border: 2px solid #dedede;
     background: rgb(211, 225, 236);
