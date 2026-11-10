@@ -65,6 +65,10 @@ class Project extends SeoDiary {
 		$webSiteCtrler = new WebsiteController();
 		$websiteList = $webSiteCtrler->__getAllWebsites( $userId, true );
 		$this->set( 'websiteList', $websiteList );
+		// see new_project.ctp.php's own comment on Cancel/Proceed - lets
+		// that view target the right area depending on how this screen
+		// was actually reached
+		$this->set( 'inModal', !empty($info['in_modal']) );
 		$this->pluginRender( 'new_project' );
 	}
 	
@@ -103,9 +107,25 @@ class Project extends SeoDiary {
 		if(! $this->validate->flagErr) {
 		    if(!$this->__checkProjectExists($listInfo ['name'])) {
 				$sql = "insert into sd_projects(website_id, name,description,status)
-					values(" . intval( $listInfo ['website_id'] ) . ", '" . addslashes( $listInfo ['name'] ) . "','" 
+					values(" . intval( $listInfo ['website_id'] ) . ", '" . addslashes( $listInfo ['name'] ) . "','"
 					. addslashes( $listInfo ['description'] ) . "',1)";
 				$this->db->query( $sql );
+
+				if (!empty($listInfo['in_modal'])) {
+					// Reached via "Create a project first" inside the
+					// dashboard's "Add to SEO Diary" modal - the Projects
+					// Manager list below makes no sense there (it's not
+					// even visible, same bug this in_modal plumbing
+					// exists to fix). Go back to New Diary instead, in
+					// the same modal, with the project just created
+					// already selected, so the diary entry the user
+					// actually started can be finished.
+					$newProjectRow = $this->db->select("select id from sd_projects where name='" . addslashes($listInfo['name']) . "' order by id desc limit 1", true);
+					$sdMgrCtrler = $this->createHelper('SD_Manager');
+					$sdMgrCtrler->newDiary(array('project_id' => !empty($newProjectRow['id']) ? $newProjectRow['id'] : '', 'in_modal' => 1));
+					exit();
+				}
+
 				$this->showProjectsManager();
 				exit();
 			} else {
@@ -227,8 +247,16 @@ class Project extends SeoDiary {
 		return !empty( $listInfo ['id'] ) ? $listInfo ['id'] : false;
 	}
 
+	// Feeds every "Project" select dropdown in the plugin (New Diary, Diary
+	// Manager filters, Project Summary, etc.) - unlike showProjectsManager()
+	// above (its own separate raw query, for the actual Projects Manager
+	// list, which still needs to show inactive projects so an admin can
+	// re-activate one), this is purely a picker for "which project does
+	// this belong to" and had no status filter at all, so a
+	// deactivated/archived project kept showing up everywhere as if still
+	// selectable.
 	function __getAllProjects($userId = '', $isAdminCheck = false, $searchName = '') {
-		$sql = "select p.*,w.name as website_name from sd_projects p,websites w where p.website_id=w.id ";
+		$sql = "select p.*,w.name as website_name from sd_projects p,websites w where p.website_id=w.id and p.status=1 ";
 		if(!$isAdminCheck || !isAdmin() ) {
 			if(!empty($userId)) $sql .= " and user_id=" . intval($userId);
 		} 

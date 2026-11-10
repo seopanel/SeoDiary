@@ -202,8 +202,17 @@
     white-space: nowrap;
 }
 .sd-selector-bar select {
+    /* Bootstrap's own .custom-select sets width:100% - inside this flex
+       bar that becomes the flex-basis (flex-basis:auto resolves to the
+       width property when one is set), so the select took 100% of the
+       bar's own width ON TOP OF the label sitting next to it, pushing it
+       past the card's edge instead of just sizing to its content with a
+       floor. width:auto overrides that back to content-sized, with
+       min-width below as the actual floor. */
+    width: auto;
     flex: 0 0 auto;
     min-width: 260px;
+    max-width: 100%;
 }
 .sd-source-desc {
     background: #f7f9fc;

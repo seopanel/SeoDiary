@@ -92,6 +92,12 @@ class SD_Manager extends SeoDiary {
 		// external deep link (e.g. "Add to SEO Diary" from the AI
 		// Visibility recommendations dashboard) prefill title/description
 		$this->set ( 'post', $info );
+		// see new_diary.ctp.php's own comment on Cancel/Proceed - lets
+		// that view target the right area depending on how this screen
+		// was actually reached (the dashboard's "Add to SEO Diary" opens
+		// it inside the shared Bootstrap #ajaxModalSP, not the page's own
+		// #content)
+		$this->set ( 'inModal', !empty($info['in_modal']) );
 		$userCtrler = new UserController ();
 		$userList = $userCtrler->__getAllUsers ();
 		$this->set ( 'userList', $userList );
@@ -204,6 +210,18 @@ class SD_Manager extends SeoDiary {
     		    $listInfo['update_time'] = $now;
     		    $listInfo['creation_time'] = $now;
     			$this->insertDiary($listInfo);
+
+    			if (!empty($listInfo['in_modal'])) {
+    			    // Reached via the dashboard's "Add to SEO Diary" quick
+    			    // action - the full diary list below is the page
+    			    // sitting behind the still-open Bootstrap #ajaxModalSP,
+    			    // not something this flow should jump to (same class of
+    			    // bug as createProject()'s own in_modal branch). Just
+    			    // confirm and stop - the task that triggered this quick
+    			    // action is now logged, nothing further to do here.
+    			    showSuccessMsg($this->pluginText['Diary created'] ?? 'Diary entry created successfully.');
+    			}
+
     			$this->showSDList(['keyword' => $listInfo ['title']]);
     			exit();
 		    }

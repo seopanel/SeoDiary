@@ -45,7 +45,20 @@ class SeoDiary extends SeoPluginsController {
 		// so every view rendered as unstyled HTML. Loading it here
 		// instead guarantees it on every single action, not just the ones
 		// reached through that one menu.
-		if (empty($data['not_set_global_vars'])) {
+		//
+		// Except the plugin's own JSON-only AJAX actions (the "AI" buttons
+		// - generateProjectAISummary/suggestDiaryDescription): their JS
+		// callers use dataType:'json', and this echo's leading
+		// <script>...</script> landing before the actual JSON body makes
+		// the whole response unparseable - jQuery's ajax then falls
+		// straight to its error handler with nothing else to go on, which
+		// is what "clicked, nothing happens" looked like live (confirmed
+		// via curl - the raw response was literally
+		// "<script>...</script>{\"ok\":true,...}"). These actions render
+		// no .sd-* markup at all, so there's nothing here for the CSS to
+		// style anyway.
+		$jsonOnlyActions = array('generateProjectAISummary', 'suggestDiaryDescription');
+		if (empty($data['not_set_global_vars']) && !in_array($data['action'] ?? '', $jsonOnlyActions)) {
 			echo $this->loadAllPluginCss(PLUGIN_PATH . "/css", $this->pluginWebPath . "/css");
 		}
 	}

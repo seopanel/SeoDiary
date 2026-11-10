@@ -1,11 +1,14 @@
 <?php /* Shared .sd-form/.sd-* design system lives in css/sd.css (plugin-wide,
    auto-loaded on every page - see SeoPluginsController::loadAllPluginCss()),
-   not duplicated here. This view renders in two places: inside the app's
+   not duplicated here. This view renders in three places: inside the app's
    jQuery UI popup (scriptDoLoadDialog(), card chrome already supplied by
-   .ui-dialog) and as a plain full-page route (Plugins > Seo Diary > Diary
+   .ui-dialog), as a plain full-page route (Plugins > Seo Diary > Diary
    Manager > New Diary, no surrounding chrome at all - see
-   diary_manager.ctp.php's link) - .sd-form carries its own card frame since
-   a wrapper isn't always there in the second context. */ ?>
+   diary_manager.ctp.php's link), and inside the newer Bootstrap
+   #ajaxModalSP (js/popup.js's openAjaxModalSP(), used by the dashboard's
+   own "Add to SEO Diary" quick action - see recommendations_main.ctp.php/
+   dashboard/main.ctp.php) - .sd-form carries its own card frame since a
+   wrapper isn't always there in the other two contexts. */ ?>
 
 <div class="sd-form">
     <div class="sd-form-header">
@@ -13,12 +16,25 @@
         <h3><?php echo $pluginText['New Diary']?></h3>
     </div>
 
-    <?php if (empty($projectList)) { ?>
+    <?php if (empty($projectList)) {
+        // openAjaxModalSP(), not pluginGETMethod('action=newProject',
+        // 'content') - that one always targets the page's own #content,
+        // which is correct for the first two contexts above but wrong for
+        // the third: from inside #ajaxModalSPBody, it loaded the New
+        // Project form into #content instead, which sits BEHIND this
+        // still-open modal - invisible until the modal was closed.
+        // openAjaxModalSP() reloads this same modal's body in place
+        // regardless of which of the three contexts opened it, so it
+        // works everywhere this view does.
+        $newProjectUrl = SP_WEBPATH . '/seo-plugins.php?pid=' . PLUGIN_ID . '&action=newProject&in_modal=1';
+        $newProjectTitle = '<i class="fas fa-folder-plus"></i> ' . ($spTextPanel['New Project'] ?? 'New Project');
+        $newProjectOnclick = "openAjaxModalSP('" . addslashes($newProjectUrl) . "', '" . addslashes($newProjectTitle) . "')";
+    ?>
     <div class="sd-empty-state">
         <i class="fas fa-exclamation-triangle"></i>
         <p>
             You don't have any projects yet - a diary entry has to belong to one.
-            <a href="javascript:void(0);" onclick="<?php echo pluginGETMethod('action=newProject', 'content')?>">Create a project first</a>.
+            <a href="javascript:void(0);" onclick="<?php echo htmlspecialchars($newProjectOnclick, ENT_QUOTES)?>">Create a project first</a>.
         </p>
     </div>
     <?php } ?>
@@ -160,11 +176,21 @@
             </div>
         </div>
 
+        <?php
+        // Same $inModal plumbing as new_project.ctp.php (set by
+        // SD_Manager::newDiary() from the in_modal request param) - this
+        // form is reached both as a plain full-page route (#content is
+        // correct) and inside the dashboard's "Add to SEO Diary" Bootstrap
+        // modal (#content is the page behind it, invisible until closed -
+        // confirmed live via screenshot).
+        $area = !empty($inModal) ? 'ajaxModalSPBody' : 'content';
+        $createArgs = 'action=createDiary' . (!empty($inModal) ? '&in_modal=1' : '');
+        ?>
         <div class="sd-form-actions">
-            <a onclick="<?php echo pluginGETMethod('action=diaryManager', 'content')?>" href="javascript:void(0);" class="btn btn-warning">
+            <a onclick="<?php echo pluginGETMethod('action=diaryManager', $area)?>" href="javascript:void(0);" class="btn btn-warning">
                 <?php echo $spText['button']['Cancel']?>
             </a>
-            <?php $actFun = SP_DEMO ? "alertDemoMsg()" : pluginPOSTMethod('projectform', 'content', 'action=createDiary'); ?>
+            <?php $actFun = SP_DEMO ? "alertDemoMsg()" : pluginPOSTMethod('projectform', $area, $createArgs); ?>
             <a onclick="<?php echo $actFun?>" href="javascript:void(0);" class="btn btn-primary">
                 <?php echo $spText['button']['Proceed']?>
             </a>
